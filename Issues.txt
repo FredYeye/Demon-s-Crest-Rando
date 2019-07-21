@@ -1,0 +1,5 @@
+picking up potions/vellums/etc will disable the drop at its original drop location.
+
+potions/vellums/etc needs custom code to exit map.
+
+hp items doesn't have disable toggles, so you can keep picking up the replacement item. custom code needed.
