@@ -23,6 +23,20 @@ enum ItemsAndEvents : uint16_t
     stage1_Potion,
 };
 
+namespace Location
+{
+    enum Locations : uint32_t
+    {
+        stage1_Vellum = 0x00B4FD,
+        arma1         = 0x00F0A2,
+        arma2         = 0x00F0A4,
+        hippogriff1   = 0x011999,
+        flameLord     = 0x014CFD,
+        somulo        = 0x0196D3,
+        stage1_Potion = 0x02511E,
+    };
+}
+
 struct GameData
 {
 	uint32_t offset;
@@ -50,6 +64,7 @@ struct Asm
 //-----
 
 void AsmAndData();
+void PrintLocations();
 
 std::vector<uint8_t> rom;
 Random rng;
@@ -64,13 +79,13 @@ std::vector<uint16_t> itemList
 
 const std::vector<ItemOffsets> itemOffsets
 {
-    {0x00B4FD, 0}, //Stage 1 vellum
-    {0x00F0A2, 1}, //Arma 1
-    {0x00F0A4, 1}, //Arma 2
-    {0x011999, 1}, //Hippogriff 1
-    {0x014CFD, 1}, //Flame Lord (| 0x4000)
-    {0x0196D3, 1}, //Somulo
-    {0x02511E, 0}, //Stage 1 potion (| 0x4000)
+    {Location::stage1_Vellum, 0}, //Stage 1 vellum
+    {Location::arma1, 1}, //Arma 1
+    {Location::arma2, 1}, //Arma 2
+    {Location::hippogriff1, 1}, //Hippogriff 1
+    {Location::flameLord, 1}, //Flame Lord (| 0x4000)
+    {Location::somulo, 1}, //Somulo
+    {Location::stage1_Potion, 0}, //Stage 1 potion (| 0x4000)
 };
 
 const std::map<uint16_t, CompletionEvent> completionEvent
@@ -92,11 +107,35 @@ const std::map<uint16_t, CompletionEvent> completionEvent
 //checks against the completion list to determine if boss is defeated
 const std::map<uint32_t, uint32_t> completionCheckOffsets
 {
-    {0x011999, 0x8123}, //Hippogriff 1
-    {0x00F0A2, 0x8125}, //Arma 1
+    {Location::hippogriff1, 0x8123},
+    {Location::arma1, 0x8125},
 };
 
 const std::vector<Asm> customAsm
 {
     {0x016B22, {0xAA, 0xBF, 0xFF, 0xD4, 0xFF, 0xD0, 0x9F, 0xEA}}, //HP exits area/stage check
+};
+
+const std::map<uint16_t, std::string> itemNames
+{
+    {hp1, "Hp 1"},
+    {hp2, "Hp 2"},
+
+    {vellum1, "Vellum 1"},
+    {potion1, "Potion 1"},
+
+    {tornado,    "Tornado"},
+    {earthCrest, "Earth crest"},
+    {airCrest,   "Air crest"},
+};
+
+const std::map<uint32_t, std::string> locationNames
+{
+    {Location::stage1_Vellum, "Stage 1 vellum"},
+    {Location::arma1,         "Arma 1"},
+    {Location::arma2,         "Arma 2"},
+    {Location::hippogriff1,   "Hippogriff 1"},
+    {Location::flameLord,     "Flame Lord"},
+    {Location::somulo,        "Somulo"},
+    {Location::stage1_Potion, "Stage 1 potion"},
 };

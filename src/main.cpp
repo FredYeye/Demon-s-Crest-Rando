@@ -24,7 +24,7 @@ int main(int argc, char* argv[])
 
     if(!seed)
 	{
-		std::cout << "No custom seed supplied, generating seed.\n";
+		std::cout << "\nNo custom seed supplied, generating seed.\n\n";
 		std::chrono::high_resolution_clock::time_point now = std::chrono::high_resolution_clock::now();
 		seed = std::chrono::duration_cast<std::chrono::nanoseconds>(now.time_since_epoch()).count();
 	}
@@ -49,10 +49,7 @@ int main(int argc, char* argv[])
 
 	U8vecToFile(rom, "DCRando.sfc"); //hmm. need to change checksum or anything? investigate
 
-	for(const uint16_t &v : itemList)
-	{
-		std::cout << std::hex << std::uppercase << std::setw(4) << std::setfill('0') << v << "\n";
-	}
+	PrintLocations();
 }
 
 
@@ -74,5 +71,18 @@ void AsmAndData()
 		{
 			rom[(0x1FD500 - 1) + rom[itemOffsets[x].offset + 1]] = 1;
 		}
+	}
+}
+
+
+void PrintLocations()
+{
+	for(int x = 0; x < itemList.size(); ++x)
+	{
+		const std::string &locationName = locationNames.at(itemOffsets[x].offset);
+		const uint16_t item = rom[itemOffsets[x].offset] | (rom[itemOffsets[x].offset + 1] << 8);
+		const std::string &itemName = itemNames.at(item);
+
+		std::cout << std::setw(14) << std::left << locationName << " | " << itemName << "\n";
 	}
 }
