@@ -20,9 +20,7 @@ Random::Random(uint64_t seed) //init
 
 void Random::Randomize(std::vector<uint16_t> &test)
 {
-    auto n = test.end() - test.begin();
-
-    for(auto i = n-1; i > 0; --i)
+    for(int i = test.size() - 1; i > 0; --i)
     {
         std::swap(test[i], test[Xoshiro256ss() % (i+1)]);
     }
