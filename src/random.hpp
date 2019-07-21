@@ -6,7 +6,7 @@
 class Random
 {
     public:
-        Random(uint64_t seed); //init
+        void Init(uint64_t seed);
         void Randomize(std::vector<uint16_t> &test);
 
     private:

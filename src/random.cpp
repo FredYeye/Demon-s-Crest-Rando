@@ -4,7 +4,7 @@
 #include "random.hpp"
 
 
-Random::Random(uint64_t seed) //init
+void Random::Init(uint64_t seed)
 {
 	smstate = seed;
 
