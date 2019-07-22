@@ -5,25 +5,24 @@
 #include "random.hpp"
 
 
-enum ItemsAndEvents : uint16_t
+namespace Item
 {
-    //items
-    hp1 = 0x0149,
-    hp2 = 0x0249,
-    hp7 = 0x0749,
+    enum Item : uint16_t
+    {
+        hp1 = 0x0149,
+        hp2 = 0x0249,
+        hp7 = 0x0749,
 
-    vellum1 = 0x002D,
-    potion1 = 0x0A2D,
+        stage1_Vellum = 0x002D,
+        stage1_Potion = 0x0A2D,
+        stage3_Potion = 0x0E2D,
 
-    buster     = 0x0048,
-    tornado    = 0x0248,
-    earthCrest = 0x0848,
-    airCrest   = 0x0A48,
-
-    //events
-    stage1_Statue,
-    stage1_Potion,
-};
+        buster     = 0x0048,
+        tornado    = 0x0248,
+        earthCrest = 0x0848,
+        airCrest   = 0x0A48,
+    };
+}
 
 namespace Location
 {
@@ -38,116 +37,68 @@ namespace Location
         ovnunu        = 0x01C6D4,
         stage1_Potion = 0x02511E,
         stage1_Hp     = 0x0251A3,
+        stage3_Potion = 0x02558E,
     };
 }
 
-struct GameData
-{
-	uint32_t offset;
-	uint16_t item;
-};
-
-struct ItemOffsets
-{
-    uint32_t offset;
-    bool shouldExit;
-};
-
-struct CompletionEvent
+struct ItemData
 {
     uint8_t completionCheckOffset;
     uint8_t completionCheckBit;
+    std::string name;
 };
 
-struct Asm
+struct LocationData
 {
-    uint32_t offset;
-    std::vector<uint8_t> code;
+    bool shouldExit;
+    bool noBounce;
+    uint32_t completionCheckOffset;
+    std::string name;
 };
 
-//-----
 
 void AsmAndData();
 void PrintLocations();
 
 std::vector<uint8_t> rom;
 Random rng;
+std::vector<uint16_t> itemList;
+std::vector<uint32_t> locationList;
 
-
-std::vector<uint16_t> itemList
+const std::map<uint16_t, ItemData> itemData
 {
-    hp1, hp2,
-    vellum1, potion1,
-    buster, tornado, earthCrest, airCrest,
+    {Item::buster,        {0, 0b0000'0001, "Buster"}},
+    {Item::tornado,       {0, 0b0000'0010, "Tornado"}},
+    {Item::earthCrest,    {0, 0b0001'0000, "Earth crest"}},
+    {Item::airCrest,      {0, 0b0010'0000, "Air Crest"}},
+
+    {Item::hp1,           {3, 0b0000'0001, "Hp 1"}},
+    {Item::hp2,           {3, 0b0000'0010, "Hp 2"}},
+    {Item::hp7,           {3, 0b0100'0000, "Hp 7"}},
+
+    {Item::stage1_Vellum, {5, 0b0000'0001, "Vellum 1"}},
+    {Item::stage1_Potion, {5, 0b0000'0010, "Potion 1"}},
+    {Item::stage3_Potion, {5, 0b1000'0000, "Potion 2"}},
 };
 
-const std::vector<ItemOffsets> itemOffsets
+const std::map<uint32_t, LocationData> locationData
 {
-    {Location::stage1_Vellum, 0},
-    {Location::arma1, 1},
-    {Location::arma2, 1},
-    {Location::hippogriff1, 1},
-    {Location::flameLord, 1}, // | 0x4000
-    {Location::somulo, 1},
-    {Location::ovnunu, 1}, // | 0x4000
-    {Location::stage1_Potion, 0}, // | 0x4000
-    {Location::stage1_Hp, 0}, // 0x4000
+    {Location::stage1_Vellum, {0, 0,      0, "Stage 1 vellum"}},
+    {Location::stage1_Hp,     {0, 1,      0, "Stage 1 hp"}},
+    {Location::stage1_Potion, {0, 1,      0, "Stage 1 potion"}},
+    {Location::somulo,        {1, 0,      0, "Somulo"}},
+    {Location::hippogriff1,   {1, 0, 0x8123, "Hippogriff 1"}},
+    {Location::arma1,         {1, 0, 0x8125, "Arma 1"}},
+
+    {Location::ovnunu,        {1, 1,      0, "Ovnunu"}},
+
+    {Location::stage3_Potion, {0, 1,      0, "Stage 3 potion"}},
+    {Location::flameLord,     {1, 1,      0, "Flame Lord"}},
+
+    {Location::arma2,         {1, 0,      0, "Arma 2"}},
 };
 
-const std::map<uint16_t, CompletionEvent> completionEvent
-{
-    {buster    , {0, 0b0000'0001}},
-    {tornado   , {0, 0b0000'0010}},
-    {earthCrest, {0, 0b0001'0000}},
-    {airCrest  , {0, 0b0010'0000}},
-
-    {vellum1, {1, 0b0000'0010}},
-    {potion1, {1, 0b0100'0000}},
-
-    {hp1, {3, 0b0000'0001}},
-    {hp2, {3, 0b0000'0010}},
-    {hp7, {3, 0b0100'0000}},
-
-    {stage1_Statue, {5, 0b01}},
-    {stage1_Potion, {5, 0b10}},
-};
-
-//checks against the completion list to determine if boss is defeated
-const std::map<uint32_t, uint32_t> completionCheckOffsets
-{
-    {Location::hippogriff1, 0x8123},
-    {Location::arma1, 0x8125},
-};
-
-const std::vector<Asm> customAsm
+const std::map<uint32_t, std::vector<uint8_t>> customAsm
 {
     {0x016B22, {0xAA, 0xBF, 0xFF, 0xD4, 0xFF, 0xD0, 0x9F, 0xEA}}, //HP exits area/stage check
-};
-
-const std::map<uint16_t, std::string> itemNames
-{
-    {hp1, "Hp 1"},
-    {hp2, "Hp 2"},
-    {hp7, "Hp 7"},
-
-    {vellum1, "Vellum 1"},
-    {potion1, "Potion 1"},
-
-    {buster,     "Buster"},
-    {tornado,    "Tornado"},
-    {earthCrest, "Earth crest"},
-    {airCrest,   "Air crest"},
-};
-
-const std::map<uint32_t, std::string> locationNames
-{
-    {Location::stage1_Vellum, "Stage 1 vellum"},
-    {Location::arma1,         "Arma 1"},
-    {Location::arma2,         "Arma 2"},
-    {Location::hippogriff1,   "Hippogriff 1"},
-    {Location::flameLord,     "Flame Lord"},
-    {Location::somulo,        "Somulo"},
-    {Location::ovnunu,        "Ovnunu"},
-    {Location::stage1_Potion, "Stage 1 potion"},
-    {Location::stage1_Hp,     "Stage 1 Hp"},
 };

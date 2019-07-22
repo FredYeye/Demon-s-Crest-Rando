@@ -29,19 +29,28 @@ int main(int argc, char* argv[])
 		seed = std::chrono::duration_cast<std::chrono::nanoseconds>(now.time_since_epoch()).count();
 	}
 
+	for(const auto kv : itemData)
+	{
+		itemList.push_back(kv.first);
+	}
+
+	for(const auto kv : locationData)
+	{
+		locationList.push_back(kv.first);
+	}
+
 	rng.Init(seed);
 	rng.Randomize(itemList);
 
 	for(int x = 0; x < itemList.size(); ++x)
 	{
-		rom[itemOffsets[x].offset    ] = itemList[x];
-		rom[itemOffsets[x].offset + 1] = itemList[x] >> 8;
+		rom[locationList[x]    ] = itemList[x];
+		rom[locationList[x] + 1] = itemList[x] >> 8;
 
-		if(completionCheckOffsets.count(itemOffsets[x].offset))
+		if(const uint32_t &offset = locationData.at(locationList[x]).completionCheckOffset; offset != 0)
 		{
-			const uint32_t &offset2 = completionCheckOffsets.at(itemOffsets[x].offset);
-			rom[offset2    ] = completionEvent.at(itemList[x]).completionCheckOffset;
-			rom[offset2 + 1] = completionEvent.at(itemList[x]).completionCheckBit;
+			rom[offset    ] = itemData.at(itemList[x]).completionCheckOffset;
+			rom[offset + 1] = itemData.at(itemList[x]).completionCheckBit;
 		}
 	}
 
@@ -56,20 +65,20 @@ int main(int argc, char* argv[])
 void AsmAndData()
 {
 	//inject custom asm
-	for(const Asm ca : customAsm)
+	for(const auto kv : customAsm)
 	{
-		for(int x = 0; x < ca.code.size(); ++x)
+		for(int x = 0; x < kv.second.size(); ++x)
 		{
-			rom[ca.offset + x] = ca.code[x];
+			rom[kv.first + x] = kv.second[x];
 		}
 	}
 
 	//update hp pickup type to exit area/stage or not)
-	for(int x = 0; x < itemOffsets.size(); ++x)
+	for(int x = 0; x < locationList.size(); ++x)
 	{
-		if(rom[itemOffsets[x].offset] == 0x49 && itemOffsets[x].shouldExit)
+		if(rom[locationList[x]] == 0x49 && locationData.at(locationList[x]).shouldExit)
 		{
-			rom[(0x1FD500 - 1) + rom[itemOffsets[x].offset + 1]] = 1;
+			rom[(0x1FD500 - 1) + rom[locationList[x] + 1]] = 1;
 		}
 	}
 }
@@ -77,12 +86,11 @@ void AsmAndData()
 
 void PrintLocations()
 {
-	for(int x = 0; x < itemList.size(); ++x)
+	for(const auto kv : locationData)
 	{
-		const std::string &locationName = locationNames.at(itemOffsets[x].offset);
-		const uint16_t item = rom[itemOffsets[x].offset] | (rom[itemOffsets[x].offset + 1] << 8);
-		const std::string &itemName = itemNames.at(item);
-
+		const std::string &locationName = kv.second.name;
+		const uint16_t item = rom[kv.first] | (rom[kv.first + 1] << 8);
+		const std::string &itemName = itemData.at(item).name;
 		std::cout << std::setw(14) << std::left << locationName << " | " << itemName << "\n";
 	}
 }
