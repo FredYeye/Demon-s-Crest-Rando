@@ -14,7 +14,7 @@ int main(int argc, char* argv[])
 
 	// if(argc >= 2)
 	// {
-		// // todo: convert secondary value to int and use as seed
+		// // todo: convert secondary value to uint64 and use as seed
 		// seed = 
 		// // todo: use param to override default rom name
 		// fileName = argv[];
@@ -25,13 +25,16 @@ int main(int argc, char* argv[])
 	if(rom[0x007FC8] != 0x63)
 	{
 		std::cout << "needs a US rom to work for now";
+		std::cin.get();
+		exit(0);
 	}
 
     if(!seed)
 	{
-		std::cout << "No custom seed supplied, generating seed.\n\n";
+		std::cout << "No custom seed supplied, generating seed: ";
 		std::chrono::high_resolution_clock::time_point now = std::chrono::high_resolution_clock::now();
 		seed = std::chrono::duration_cast<std::chrono::nanoseconds>(now.time_since_epoch()).count();
+		std::cout << seed << "\n";
 	}
 
 	for(const auto kv : itemData)

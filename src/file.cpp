@@ -12,6 +12,7 @@ const std::vector<uint8_t> FileToU8Vec(const std::string inFile)
     if(iFile.is_open() == false)
     {
         std::cout << inFile << " not found\n";
+        std::cin.get();
         exit(0);
     }
 
