@@ -64,6 +64,7 @@ struct LocationData
 void AsmAndData();
 void PrintLocations();
 
+uint64_t seed = 0;
 std::vector<uint8_t> rom;
 Random rng;
 std::vector<uint16_t> itemList;

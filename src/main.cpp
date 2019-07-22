@@ -11,7 +11,6 @@
 int main(int argc, char* argv[])
 {
 	std::string fileName = "Demon's Crest (USA).sfc";
-	uint64_t seed = 0;
 
 	// if(argc >= 2)
 	// {
@@ -103,7 +102,9 @@ void AsmAndData()
 void PrintLocations()
 {
 	std::string outfile = "log.txt";
-	std::ofstream result(outfile, std::ios::out | std::ios::binary);
+	std::ofstream logFile(outfile, std::ios::out | std::ios::binary);
+
+	logFile << "seed: " << seed << "\n\n";
 
 	for(const auto kv : locationData)
 	{
@@ -111,8 +112,8 @@ void PrintLocations()
 		const uint16_t item = (rom[kv.first] | (rom[kv.first + 1] << 8)) & ~0x4000;
 		const std::string &itemName = itemData.at(item).name;
 
-		result << std::setw(14) << std::left << locationName << " | " << itemName << "\n";
+		logFile << std::setw(14) << std::left << locationName << " | " << itemName << "\n";
 	}
 
-	result.close();
+	logFile.close();
 }
