@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
 		rom[locationList[x]    ] = itemList[x];
 		rom[locationList[x] + 1] = itemList[x] >> 8;
 
-		if(const uint32_t &offset = locationData.at(locationList[x]).completionCheckOffset; offset != 0)
+		if(const uint32_t &offset = locationData.at(locationList[x]).bossDefeatedOffset; offset != 0)
 		{
 			rom[offset    ] = itemData.at(itemList[x]).completionCheckOffset;
 			rom[offset + 1] = itemData.at(itemList[x]).completionCheckBit;
@@ -73,7 +73,7 @@ void AsmAndData()
 		}
 	}
 
-	//update hp pickup type to exit area/stage or not)
+	//update hp pickup type to exit area/stage if necessary)
 	for(int x = 0; x < locationList.size(); ++x)
 	{
 		if(rom[locationList[x]] == 0x49 && locationData.at(locationList[x]).shouldExit)
@@ -91,6 +91,7 @@ void PrintLocations()
 		const std::string &locationName = kv.second.name;
 		const uint16_t item = rom[kv.first] | (rom[kv.first + 1] << 8);
 		const std::string &itemName = itemData.at(item).name;
+
 		std::cout << std::setw(14) << std::left << locationName << " | " << itemName << "\n";
 	}
 }

@@ -9,6 +9,11 @@ namespace Item
 {
     enum Item : uint16_t
     {
+        buster     = 0x0048,
+        tornado    = 0x0248,
+        earthCrest = 0x0848,
+        airCrest   = 0x0A48,
+
         hp1 = 0x0149,
         hp2 = 0x0249,
         hp7 = 0x0749,
@@ -16,11 +21,6 @@ namespace Item
         stage1_Vellum = 0x002D,
         stage1_Potion = 0x0A2D,
         stage3_Potion = 0x0E2D,
-
-        buster     = 0x0048,
-        tornado    = 0x0248,
-        earthCrest = 0x0848,
-        airCrest   = 0x0A48,
     };
 }
 
@@ -29,15 +29,18 @@ namespace Location
     enum Locations : uint32_t
     {
         stage1_Vellum = 0x00B4FD,
-        arma1         = 0x00F0A2,
-        arma2         = 0x00F0A4,
-        hippogriff1   = 0x011999,
-        flameLord     = 0x014CFD,
-        somulo        = 0x0196D3,
-        ovnunu        = 0x01C6D4,
-        stage1_Potion = 0x02511E,
         stage1_Hp     = 0x0251A3,
+        stage1_Potion = 0x02511E,
+        somulo        = 0x0196D3,
+        hippogriff1   = 0x011999,
+        arma1         = 0x00F0A2,
+
+        ovnunu        = 0x01C6D4,
+
         stage3_Potion = 0x02558E,
+        flameLord     = 0x014CFD,
+
+        arma2         = 0x00F0A4,
     };
 }
 
@@ -52,7 +55,7 @@ struct LocationData
 {
     bool shouldExit;
     bool noBounce;
-    uint32_t completionCheckOffset;
+    uint32_t bossDefeatedOffset; //name? check if boss already defeated
     std::string name;
 };
 
