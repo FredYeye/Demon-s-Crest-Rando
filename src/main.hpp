@@ -5,6 +5,7 @@
 #include "random.hpp"
 
 
+//maybe remove these two enums as we now have a name string anyway. but could be useful later maybe
 namespace Item
 {
     enum Item : uint16_t
@@ -55,7 +56,7 @@ struct LocationData
 {
     bool shouldExit;
     bool noBounce;
-    uint32_t bossDefeatedOffset; //name? check if boss already defeated
+    uint32_t bossDefeatedOffset;
     std::string name;
 };
 
@@ -103,5 +104,10 @@ const std::map<uint32_t, LocationData> locationData
 
 const std::map<uint32_t, std::vector<uint8_t>> customAsm
 {
-    {0x016B22, {0xAA, 0xBF, 0xFF, 0xD4, 0xFF, 0xD0, 0x9F, 0xEA}}, //HP exits area/stage check
+    //HP exits area/stage check
+    {0x016B22, {0xAA, 0xBF, 0xFF, 0xD4, 0xFF, 0xD0, 0x9F, 0xEA}},
+
+    //item exits area/stage check
+    {0x016148, {0x22, 0x30, 0xD5, 0xBF}},
+    {0x1FD530, {0x22, 0x5A, 0x9A, 0x80, 0xA5, 0x03, 0x4A, 0xAF, 0x42, 0xD5, 0xBF, 0xF0, 0x04, 0x5C, 0x58, 0xBB, 0x80, 0x6B}},
 };
