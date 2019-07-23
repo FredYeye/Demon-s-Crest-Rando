@@ -24,7 +24,7 @@ int main(int argc, char* argv[])
 
 	if(rom[0x007FC8] != 0x63)
 	{
-		std::cout << "needs a US rom to work for now";
+		std::cout << "needs a US rom to work for now\n";
 		std::cin.get();
 		exit(0);
 	}
@@ -91,12 +91,17 @@ void AsmAndData()
 		if(rom[locationList[x]] == 0x49 && locationData.at(locationList[x]).shouldExit)
 		{
 			//update hp pickup type to exit area/stage if necessary)
-			rom[(0x1FD500 - 1) + (rom[locationList[x] + 1] & ~0x4000)] = 1;
+			rom[(0x1FD500 - 1) + (rom[locationList[x] + 1] & ~0x40)] = 1;
 		}
 		else if(rom[locationList[x]] == 0x2D && locationData.at(locationList[x]).shouldExit)
 		{
 			//update item pickup list to exit area/stage if necessary
-			rom[0x1FD542 + ((rom[locationList[x] + 1] & ~0x4000) >> 1)] = 1;
+			rom[0x1FD547 + ((rom[locationList[x] + 1] & ~0x40) >> 1)] = 1;
+		}
+		else if(rom[locationList[x]] == 0x48)
+		{
+			//update power pickup list to exit/not exit area/stage
+			rom[0x1FD597 + ((rom[locationList[x] + 1] & ~0x40) >> 1)] = (locationData.at(locationList[x]).shouldExit) ? 2 : 6;
 		}
 	}
 }

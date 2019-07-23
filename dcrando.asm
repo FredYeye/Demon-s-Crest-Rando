@@ -1,4 +1,4 @@
-hirom
+lorom
 
 ;determine if hp up will exit area/stage
 {
@@ -23,13 +23,40 @@ hirom
 
     org $BFD530 : item_exit_check: ;0x1FD530
         jsl update_item_total
+        sep #$30
         lda $03
+        and #$BF ;remove "no bounce" property
         lsr
-        lda.l item_exit_list
+        tax
+        lda.l item_exit_list,X
         beq .ret
         jml exit_area
     .ret:
         rtl
 
     item_exit_list: ;DCRando will fill in these
+}
+
+;determine if crest/firepower will exit area/stage
+{
+    org $82EAD6 : jsl power_exit_check
+
+    org $BFD580 : power_exit_check: ;0x1FD580
+        lda $02 ;catch hp upgrades and always store 2 (like original code)
+        cmp #$49
+        bne .is_power
+        lda #$02
+        bra .store
+
+.is_power:
+        lda $03
+        and #$BF
+        lsr
+        tax
+        lda.l .power_exit_list
+    .store:
+        sta $05
+        rtl
+        
+    .power_exit_list: ;DCRando will fill in these
 }
