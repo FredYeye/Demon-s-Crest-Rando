@@ -47,13 +47,30 @@ int main(int argc, char* argv[])
 		locationList.push_back(kv.first);
 	}
 
+	if(itemList.size() != locationList.size())
+	{
+		std::cout << "item and location count doesn't match (" << itemList.size() << " items, " << locationList.size() << " locations)\n";
+		std::cin.get();
+		exit(0);
+	}
+
 	rng.Init(seed);
 	rng.Randomize(itemList);
 
 	for(int x = 0; x < itemList.size(); ++x)
 	{
-		rom[locationList[x]    ] = itemList[x];
-		rom[locationList[x] + 1] = itemList[x] >> 8;
+		rom[locationList[x]] = itemList[x];
+
+		if(locationList[x] == Location::crawler)
+		{
+			rom[locationList[x] + 3] = itemList[x] >> 8;
+
+			crawlerItem = itemList[x];
+		}
+		else //default case
+		{
+			rom[locationList[x] + 1] = itemList[x] >> 8;
+		}
 
 		if(locationData.at(locationList[x]).noBounce)
 		{
@@ -62,8 +79,19 @@ int main(int argc, char* argv[])
 
 		if(const uint32_t &offset = locationData.at(locationList[x]).bossDefeatedOffset; offset != 0)
 		{
-			rom[offset    ] = itemData.at(itemList[x]).completionCheckOffset;
-			rom[offset + 1] = itemData.at(itemList[x]).completionCheckBit;
+			rom[offset] = itemData.at(itemList[x]).completionCheckOffset;
+
+			if(locationList[x] == Location::crawler) //crawler special case
+			{
+				rom[offset + 6] = itemData.at(itemList[x]).completionCheckBit;
+
+				crawlerOffset = rom[offset];
+				crawlerBit = rom[offset + 6];
+			}
+			else //default case
+			{
+				rom[offset + 1] = itemData.at(itemList[x]).completionCheckBit;
+			}
 		}
 	}
 
@@ -88,6 +116,15 @@ void AsmAndData()
 
 	for(int x = 0; x < locationList.size(); ++x)
 	{
+		if(locationList[x] == Location::crawler)
+		{
+			//crawler's item data gets overwritten by the custom asm injection. re-add
+			const uint32_t &crawlerFix = locationData.at(Location::crawler).bossDefeatedOffset;
+			rom[crawlerFix] = crawlerOffset;
+			rom[crawlerFix] = crawlerBit;
+			continue;
+		}
+
 		if(rom[locationList[x]] == 0x49 && locationData.at(locationList[x]).shouldExit)
 		{
 			//update hp pickup type to exit area/stage if necessary)
@@ -103,6 +140,10 @@ void AsmAndData()
 			//update power pickup list to exit/not exit area/stage
 			rom[0x1FD597 + ((rom[locationList[x] + 1] & ~0x40) >> 1)] = (locationData.at(locationList[x]).shouldExit) ? 2 : 6;
 		}
+		else if(rom[locationList[x]] == 0x2E && locationData.at(locationList[x]).shouldExit)
+		{
+			rom[0x1FD5D5 + ((rom[locationList[x] + 1] & ~0x40) >> 1)] = 1;
+		}
 	}
 }
 
@@ -116,8 +157,17 @@ void PrintLocations()
 
 	for(const auto kv : locationData)
 	{
+		uint16_t item;
+		if(kv.first == Location::crawler)
+		{
+			item = crawlerItem;
+		}
+		else
+		{
+			item = (rom[kv.first] | (rom[kv.first + 1] << 8)) & ~0x4000;
+		}
+
 		const std::string &locationName = kv.second.name;
-		const uint16_t item = (rom[kv.first] | (rom[kv.first + 1] << 8)) & ~0x4000;
 		const std::string &itemName = itemData.at(item).name;
 
 		logFile << std::setw(14) << std::left << locationName << " | " << itemName << "\n";

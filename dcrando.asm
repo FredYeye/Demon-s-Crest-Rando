@@ -53,10 +53,42 @@ lorom
         and #$BF
         lsr
         tax
-        lda.l .power_exit_list
+        lda.l .power_exit_list,X
     .store:
         sta $05
         rtl
         
     .power_exit_list: ;DCRando will fill in these
+}
+
+;crawler item check
+{
+    org $849977 : jsl crawler_item_check : nop ;0x021977
+
+    org $BFD5B0 : crawler_item_check: ;0x1FD5B0
+        ldx #$0000 ;crawler offset - set from DCRando
+        lda $1E51,X
+        and #$0000 ;crawler bit - set from DCRando
+        rtl
+}
+
+;determine if talisman will exit area/stage
+{
+    org $82E16A : jsl talisman_check ;0x01616A
+
+    org $BFD5C0 : talisman_check: ;0x1FD5C0
+        eor #$06 ;overwritten code from previous function
+        sta $00  ;^
+
+        lda $03
+        and #$BF
+        lsr
+        tax
+        lda.l talisman_exit_list,X
+        beq .ret
+        jml exit_area
+    .ret:
+        rtl
+
+    talisman_exit_list: ;DCRando will fill in these
 }
