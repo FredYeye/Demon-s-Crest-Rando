@@ -19,6 +19,7 @@ namespace Item
         hp1  = 0x0149, //somulo
         hp2  = 0x0249,
         hp3  = 0x0349, //belth
+        hp4  = 0x0449, //scula
         hp5  = 0x0549,
         hp7  = 0x0749,
         hp9  = 0x0949, //stage 2 bone pile
@@ -26,6 +27,7 @@ namespace Item
         hp14 = 0x0E49,
 
         stage1_Vellum = 0x002D,
+        stage3_Vellum = 0x042D,
         stage4_Vellum = 0x062D,
         stage1_Potion = 0x0A2D,
         stage3_Potion = 0x0E2D,
@@ -52,9 +54,11 @@ namespace Location
         ovnunu        = 0x01C6D4,
 
         stage3_Potion = 0x02558E,
+        stage3_Vellum = 0x00D866,
         stage3_Hp     = 0x026163,
         skull         = 0x0257B1,
         flameLord     = 0x014CFD,
+        scula         = 0x1E8B99,
 
         stage4_Potion = 0x025813,
         stage4_Vellum = 0x0259BC,
@@ -113,9 +117,13 @@ const std::map<uint16_t, ItemData> itemData
     {Item::buster,        {0, 0b0000'0001, 0b0001, "Buster"}},
     {Item::tornado,       {0, 0b0000'0010, 0b0100, "Tornado"}},
     {Item::claw,          {0, 0b0000'0100,      0, "Claw"}},
+    // {Item::demonFire,     {0, 0b0000'1000,       , "Demon fire"}},
     {Item::earthCrest,    {0, 0b0001'0000, 0b0010, "Earth crest"}},
     {Item::airCrest,      {0, 0b0010'0000, 0b0100, "Air Crest"}},
     {Item::waterCrest,    {0, 0b0100'0000, 0b1000, "Water Crest"}},
+    // {Item::legendary,     {0, 0b1000'0000,       , "Legendary Gargoyle"}}
+
+    // {Item::ultimate,      {1, 0b0000'0001,       , "Ultimate gargoyle"}},
 
     {Item::crown,         {2, 0b0000'1000,      0, "Crown"}},
     {Item::skull,         {2, 0b0001'0000,      0, "Skull"}},
@@ -123,6 +131,7 @@ const std::map<uint16_t, ItemData> itemData
     {Item::hp1,           {3, 0b0000'0001,      0, "Hp 1"}},
     {Item::hp2,           {3, 0b0000'0010,      0, "Hp 2"}},
     {Item::hp3,           {3, 0b0000'0100,      0, "Hp 3"}},
+    {Item::hp4,           {3, 0b0000'1000,      0, "Hp 4"}},
     {Item::hp5,           {3, 0b0001'0000,      0, "Hp 5"}},
     {Item::hp7,           {3, 0b0100'0000,      0, "Hp 7"}},
     {Item::hp9,           {4, 0b0000'0001,      0, "Hp 9"}},
@@ -130,6 +139,7 @@ const std::map<uint16_t, ItemData> itemData
     {Item::hp14,          {4, 0b0010'0000,      0, "Hp 14"}},
 
     {Item::stage1_Vellum, {5, 0b0000'0001,      0, "Vellum (s1)"}},
+    {Item::stage3_Vellum, {5, 0b0000'0100,      0, "Vellum (s3)"}},
     {Item::stage4_Vellum, {5, 0b0000'1000,      0, "Vellum (s4)"}},
     {Item::stage1_Potion, {5, 0b0000'0010,      0, "Potion (s1)"}},
     {Item::stage3_Potion, {5, 0b1000'0000,      0, "Potion (s3)"}},
@@ -153,6 +163,8 @@ const std::map<uint32_t, LocationData> locationData
     {Location::stage3_Hp,     {0, 1,      0,        0, "Stage 3 hp"}},
     {Location::skull,         {0, 1, 0b0001,        0, "Skull"}},
     {Location::flameLord,     {1, 1,      0,   0x812B, "Flame Lord"}},
+    {Location::stage3_Vellum, {0, 0, 0b0001,        0, "Stage 3 vellum"}},
+    {Location::scula,         {1, 0,      0,   0x8129, "Scula"}},
 
     {Location::stage4_Potion, {0, 1, 0b0001,        0, "Stage 4 potion"}},
     {Location::stage4_Vellum, {0, 1,      0,        0, "Stage 4 vellum"}},

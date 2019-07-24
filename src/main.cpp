@@ -152,6 +152,8 @@ void AsmAndData()
 		std::copy(code.begin(), code.end(), rom.begin() + offset);
 	}
 
+	rom[0x02A22E] = 0x01; //was -1, enable stages 5 & 6 from the start
+
 	for(const auto [loc, locData] : locationData)
 	{
 		if(loc == Location::crawler)
