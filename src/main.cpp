@@ -3,6 +3,7 @@
 #include <iostream>
 #include <iomanip>
 #include <chrono>
+#include <algorithm>
 
 #include "main.hpp"
 #include "file.hpp"
@@ -57,40 +58,80 @@ int main(int argc, char* argv[])
 	rng.Init(seed);
 	rng.Randomize(itemList);
 
-	for(int x = 0; x < itemList.size(); ++x)
+	uint8_t reqState = 0;
+	bool reqLocationsFilled = false;
+
+	int iLoc = 0, iItem = 0;
+	while(locationList.size() > 0)
 	{
-		rom[locationList[x]] = itemList[x];
+		const uint32_t &location = locationList[iLoc];
+		const uint16_t &item = itemList[iItem];
+		const uint8_t &locRequirement = locationData.at(locationList[iLoc]).requirement;
 
-		if(locationList[x] == Location::crawler)
+
+		//problem: by filling all accessible slots first, key items might be left over for locked slots!
+
+
+		if
+		(
+			locRequirement &&                                            //if location has a requirement
+			!(locRequirement & itemData.at(item).ability & ~reqState) || //and doesn't require item ability, or we already have it
+			reqLocationsFilled                                           //fill all requirement slots first
+		)
 		{
-			rom[locationList[x] + 3] = itemList[x] >> 8;
-
-			crawlerItem = itemList[x];
-		}
-		else //default case
-		{
-			rom[locationList[x] + 1] = itemList[x] >> 8;
-		}
-
-		if(locationData.at(locationList[x]).noBounce)
-		{
-			rom[locationList[x] + 1] |= 0x40; // or item value with 0x4000 to stop item bounce
-		}
-
-		if(const uint32_t &offset = locationData.at(locationList[x]).bossDefeatedOffset; offset != 0)
-		{
-			rom[offset] = itemData.at(itemList[x]).completionCheckOffset;
-
-			if(locationList[x] == Location::crawler) //crawler special case
+			if(location != Location::crawler)
 			{
-				rom[offset + 6] = itemData.at(itemList[x]).completionCheckBit;
+				rom[location    ] = item;
+				rom[location + 1] = item >> 8;
 
-				crawlerOffset = rom[offset];
-				crawlerBit = rom[offset + 6];
+				if(locationData.at(location).noBounce)
+				{
+					rom[location + 1] |= 0x40; // or item value with 0x4000 to stop item bounce
+				}
 			}
-			else //default case
+			else //crawler special case
 			{
-				rom[offset + 1] = itemData.at(itemList[x]).completionCheckBit;
+				rom[location    ] = item;
+				rom[location + 3] = item >> 8;
+			}
+
+			if(const uint32_t &offset = locationData.at(location).bossDefeatedOffset; offset != 0)
+			{
+				if(location != Location::crawler)
+				{
+					rom[offset    ] = itemData.at(item).completionCheckOffset;
+					rom[offset + 1] = itemData.at(item).completionCheckBit;
+				}
+				else //crawler special case
+				{
+					rom[offset] = itemData.at(item).completionCheckOffset;
+					rom[offset + 6] = itemData.at(item).completionCheckBit;
+					crawlerOffset = rom[offset];
+					crawlerBit = rom[offset + 6];
+				}
+			}
+
+			reqState |= itemData.at(item).ability;
+
+			locationList.erase(locationList.begin() + iLoc);
+			itemList.erase(itemList.begin() + iItem);
+			iLoc = 0;
+			iItem = 0;
+		}
+		else
+		{
+			if(++iItem >= itemList.size())
+			{
+				iItem = 0;
+				if(++iLoc >= locationList.size())
+				{
+					iLoc = 0;
+
+					for(const auto v : locationList)
+					{
+						reqLocationsFilled |= !locationData.at(location).requirement;
+					}
+				}
 			}
 		}
 	}
@@ -106,43 +147,35 @@ int main(int argc, char* argv[])
 void AsmAndData()
 {
 	//inject custom asm
-	for(const auto kv : customAsm)
+	for(const auto [offset, code] : customAsm)
 	{
-		for(int x = 0; x < kv.second.size(); ++x)
-		{
-			rom[kv.first + x] = kv.second[x];
-		}
+		std::copy(code.begin(), code.end(), rom.begin() + offset);
 	}
 
-	for(int x = 0; x < locationList.size(); ++x)
+	for(const auto [loc, locData] : locationData)
 	{
-		if(locationList[x] == Location::crawler)
+		if(loc == Location::crawler)
 		{
 			//crawler's item data gets overwritten by the custom asm injection. re-add
-			const uint32_t &crawlerFix = locationData.at(Location::crawler).bossDefeatedOffset;
+			const uint32_t &crawlerFix = locData.bossDefeatedOffset;
 			rom[crawlerFix] = crawlerOffset;
-			rom[crawlerFix] = crawlerBit;
+			rom[crawlerFix + 6] = crawlerBit;
 			continue;
 		}
 
-		if(rom[locationList[x]] == 0x49 && locationData.at(locationList[x]).shouldExit)
+		if(locationData.at(loc).shouldExit) //update item to exit area/stage if necessary
 		{
-			//update hp pickup type to exit area/stage if necessary)
-			rom[(0x1FD500 - 1) + (rom[locationList[x] + 1] & ~0x40)] = 1;
+			switch(rom[loc])
+			{
+				case 0x2D: rom[0x1FD547 + ((rom[loc + 1] & ~0x40) >> 1)] = 1; break;
+				case 0x2E: rom[0x1FD5D5 + ((rom[loc + 1] & ~0x40) >> 1)] = 1; break;
+				case 0x48: rom[0x1FD597 + ((rom[loc + 1] & ~0x40) >> 1)] = 2; break;
+				case 0x49: rom[(0x1FD500 - 1) + (rom[loc + 1] & ~0x40)]  = 1; break;
+			}
 		}
-		else if(rom[locationList[x]] == 0x2D && locationData.at(locationList[x]).shouldExit)
+		else if(rom[loc] == 0x48)
 		{
-			//update item pickup list to exit area/stage if necessary
-			rom[0x1FD547 + ((rom[locationList[x] + 1] & ~0x40) >> 1)] = 1;
-		}
-		else if(rom[locationList[x]] == 0x48)
-		{
-			//update power pickup list to exit/not exit area/stage
-			rom[0x1FD597 + ((rom[locationList[x] + 1] & ~0x40) >> 1)] = (locationData.at(locationList[x]).shouldExit) ? 2 : 6;
-		}
-		else if(rom[locationList[x]] == 0x2E && locationData.at(locationList[x]).shouldExit)
-		{
-			rom[0x1FD5D5 + ((rom[locationList[x] + 1] & ~0x40) >> 1)] = 1;
+			rom[0x1FD597 + ((rom[loc + 1] & ~0x40) >> 1)] = 6;
 		}
 	}
 }
@@ -150,27 +183,30 @@ void AsmAndData()
 
 void PrintLocations()
 {
-	std::string outfile = "log.txt";
-	std::ofstream logFile(outfile, std::ios::out | std::ios::binary);
+	std::ofstream logFile("log.txt", std::ios::out | std::ios::binary);
 
 	logFile << "seed: " << seed << "\n\n";
 
-	for(const auto kv : locationData)
+	for(const auto stage : printOrder)
 	{
-		uint16_t item;
-		if(kv.first == Location::crawler)
+		for(const auto loc : stage)
 		{
-			item = crawlerItem;
-		}
-		else
-		{
-			item = (rom[kv.first] | (rom[kv.first + 1] << 8)) & ~0x4000;
-		}
+			uint16_t item;
+			if(loc == Location::crawler)
+			{
+				item = rom[loc] | (rom[loc + 3] << 8);
+			}
+			else
+			{
+				item = (rom[loc] | (rom[loc + 1] << 8)) & ~0x4000;
+			}
 
-		const std::string &locationName = kv.second.name;
-		const std::string &itemName = itemData.at(item).name;
+			const std::string &locationName = locationData.at(loc).name;
+			const std::string &itemName = itemData.at(item).name;
 
-		logFile << std::setw(14) << std::left << locationName << " | " << itemName << "\n";
+			logFile << std::setw(14) << std::left << locationName << " | " << itemName << "\n";
+		}
+		logFile << "\n";
 	}
 
 	logFile.close();
