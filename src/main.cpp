@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
 	rng.Init(seed);
 	rng.Randomize(itemList);
 
-	uint8_t reqState = 0;
+	uint8_t currentAbilities = 0;
 	bool reqLocationsFilled = false;
 
 	int iLoc = 0, iItem = 0;
@@ -66,20 +66,26 @@ int main(int argc, char* argv[])
 	{
 		const uint32_t &location = locationList[iLoc];
 		const uint16_t &item = itemList[iItem];
-		const uint8_t &locRequirement = locationData.at(locationList[iLoc]).requirement;
 
+		const uint8_t &locRequirement = locationData.at(location).requirement;
+		const uint8_t &itemAbility = itemData.at(item).ability;
 
-		//problem: by filling all accessible slots first, key items might be left over for locked slots!
-
+		const bool abilityReqMet = (locRequirement & currentAbilities == locRequirement);
 
 		if
 		(
-			locRequirement &&                                            //if location has a requirement
-			!(locRequirement & itemData.at(item).ability & ~reqState) || //and doesn't require item ability, or we already have it
-			reqLocationsFilled                                           //fill all requirement slots first
+			locRequirement &&  //if location has a requirement, and
+			abilityReqMet  ||  //requirement is met, or
+			!itemAbility   ||  //ability isn't needed.
+			reqLocationsFilled //lastly, fill locations without requirements
 		)
 		{
-			if(location != Location::crawler)
+			if(location == Location::crawler || location == Location::grewon)
+			{
+				rom[location    ] = item >> 8;
+				rom[location + 3] = item;
+			}
+			else //default
 			{
 				rom[location    ] = item;
 				rom[location + 1] = item >> 8;
@@ -88,11 +94,6 @@ int main(int argc, char* argv[])
 				{
 					rom[location + 1] |= 0x40; // or item value with 0x4000 to stop item bounce
 				}
-			}
-			else //crawler special case
-			{
-				rom[location    ] = item;
-				rom[location + 3] = item >> 8;
 			}
 
 			if(const uint32_t &offset = locationData.at(location).bossDefeatedOffset; offset != 0)
@@ -114,27 +115,33 @@ int main(int argc, char* argv[])
 					rom[offset    ] = itemData.at(item).completionCheckOffset;
 					rom[offset + 1] = itemData.at(item).completionCheckBit;
 				}
+
+				if(location == Location::arma3) //needs additional location fix
+				{
+					rom[0x1F63E2] = 0x51 + itemData.at(item).completionCheckOffset;
+					rom[0x1F63E5] = itemData.at(item).completionCheckBit;
+				}
 			}
 
-			reqState |= itemData.at(item).ability;
+			currentAbilities |= itemAbility;
 
 			locationList.erase(locationList.begin() + iLoc);
 			itemList.erase(itemList.begin() + iItem);
 			iLoc = 0;
 			iItem = 0;
 		}
-		else
+		else //failed to place item
 		{
-			if(++iItem >= itemList.size())
+			if(++iItem >= itemList.size()) //try next item, unless we've tried every item
 			{
 				iItem = 0;
-				if(++iLoc >= locationList.size())
+				if(++iLoc >= locationList.size()) //try next location
 				{
 					iLoc = 0;
 
-					for(const auto v : locationList)
+					for(const uint32_t loc : locationList)
 					{
-						reqLocationsFilled |= !locationData.at(location).requirement;
+						reqLocationsFilled |= !locationData.at(loc).requirement;
 					}
 				}
 			}
@@ -203,9 +210,9 @@ void PrintLocations()
 		for(const auto loc : stage)
 		{
 			uint16_t item;
-			if(loc == Location::crawler)
+			if(loc == Location::crawler || loc == Location::grewon)
 			{
-				item = rom[loc] | (rom[loc + 3] << 8);
+				item = (rom[loc] << 8) | rom[loc + 3];
 			}
 			else
 			{
