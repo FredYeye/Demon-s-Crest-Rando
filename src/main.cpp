@@ -169,6 +169,7 @@ void AsmAndData()
 	}
 
 	rom[0x02A22E] = 0x01; //was -1, enable stages 5 & 6 from the start
+	rom[0x02A246] = 0x01; //was 2, enable stages 5 & 6 instead of phalanx 1
 
 	for(const auto [loc, locData] : locationData)
 	{

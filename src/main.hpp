@@ -149,7 +149,7 @@ const std::map<uint16_t, ItemData> itemData
     {Item::earthCrest,    {0, 0b0001'0000, 0b0010, "Earth crest"}},
     {Item::airCrest,      {0, 0b0010'0000, 0b0100, "Air Crest"}},
     {Item::waterCrest,    {0, 0b0100'0000, 0b1000, "Water Crest"}},
-    {Item::timeCrest,     {0, 0b1000'0000,      0, "Time Crest"}},
+    {Item::timeCrest,     {0, 0b1000'0000, 0b0001, "Time Crest"}},
 
     // {Item::ultimate,      {1, 0b0000'0001,       , "Ultimate gargoyle"}},
 
@@ -196,8 +196,8 @@ const std::map<uint32_t, LocationData> locationData
     {Location::hippogriff1,   {1, 0,      0,   0x8123, "Hippogriff 1"}},
     {Location::arma1,         {1, 0,      0,   0x8125, "Arma 1"}},
 
-    {Location::stage2_Potion, {0, 1, 0b1000,        0, "Potion (s2)"}}, //water or hp. add secondary req later
-    {Location::hand,          {0, 1, 0b1000,        0, "Hand"}},        //^
+    {Location::stage2_Potion, {0, 1,      0,        0, "Potion (s2)"}},
+    {Location::hand,          {0, 1, 0b1000,        0, "Hand"}},        //water or hp. add secondary req later
     {Location::stage2_Vellum, {0, 0, 0b0011,        0, "Vellum (s2)"}},
     {Location::stage2_Hp2,    {0, 0, 0b0011,        0, "Stage 2 hp (pot)"}},
     {Location::stage2_Hp1,    {0, 0, 0b0010,        0, "Stage 2 hp (bone pile)"}},
