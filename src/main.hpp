@@ -58,7 +58,8 @@ namespace Location
         stage3_Hp     = 0x026163,
         skull         = 0x0257B1,
         flameLord     = 0x014CFD,
-        scula         = 0x1E8B99,
+        scula         = 0x1E8B99, //head
+        scula2        = 0x1E85AD, //body
 
         stage4_Potion = 0x025813,
         stage4_Vellum = 0x0259BC,
@@ -157,13 +158,13 @@ const std::map<uint32_t, LocationData> locationData
 
     {Location::stage2_Hp,     {0, 0, 0b0010,        0, "Stage 2 hp (1)"}},
     {Location::belth,         {1, 0,      0,   0x8127, "Belth"}},
-    {Location::ovnunu,        {1, 1, 0b0010,        0, "Ovnunu"}}, //todo
+    {Location::ovnunu,        {1, 1, 0b0010, 0x0209F8, "Ovnunu"}},
 
     {Location::stage3_Potion, {0, 1,      0,        0, "Stage 3 potion"}},
+    {Location::stage3_Vellum, {0, 0, 0b0001,        0, "Stage 3 vellum"}},
     {Location::stage3_Hp,     {0, 1,      0,        0, "Stage 3 hp"}},
     {Location::skull,         {0, 1, 0b0001,        0, "Skull"}},
     {Location::flameLord,     {1, 1,      0,   0x812B, "Flame Lord"}},
-    {Location::stage3_Vellum, {0, 0, 0b0001,        0, "Stage 3 vellum"}},
     {Location::scula,         {1, 0,      0,   0x8129, "Scula"}},
 
     {Location::stage4_Potion, {0, 1, 0b0001,        0, "Stage 4 potion"}},
@@ -216,9 +217,11 @@ const std::vector<std::vector<uint32_t>> printOrder
     },
     {
         Location::stage3_Potion,
+        Location::stage3_Vellum,
         Location::stage3_Hp,
         Location::skull,
         Location::flameLord,
+        Location::scula,
     },
     {
         Location::stage4_Potion,

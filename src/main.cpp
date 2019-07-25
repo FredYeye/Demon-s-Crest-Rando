@@ -97,17 +97,22 @@ int main(int argc, char* argv[])
 
 			if(const uint32_t &offset = locationData.at(location).bossDefeatedOffset; offset != 0)
 			{
-				if(location != Location::crawler)
+				if(location == Location::crawler) //crawler special case
 				{
 					rom[offset    ] = itemData.at(item).completionCheckOffset;
-					rom[offset + 1] = itemData.at(item).completionCheckBit;
-				}
-				else //crawler special case
-				{
-					rom[offset] = itemData.at(item).completionCheckOffset;
 					rom[offset + 6] = itemData.at(item).completionCheckBit;
 					crawlerOffset = rom[offset];
 					crawlerBit = rom[offset + 6];
+				}
+				else if(location == Location::ovnunu) //ovnunu special case
+				{
+					rom[offset    ] = 0x51 + itemData.at(item).completionCheckOffset;
+					rom[offset + 3] = itemData.at(item).completionCheckBit;
+				}
+				else //default
+				{
+					rom[offset    ] = itemData.at(item).completionCheckOffset;
+					rom[offset + 1] = itemData.at(item).completionCheckBit;
 				}
 			}
 
@@ -135,6 +140,10 @@ int main(int argc, char* argv[])
 			}
 		}
 	}
+
+	//scula head & body are considered different entities and have different drops. copy to other part
+	rom[Location::scula2] = rom[Location::scula];
+	rom[Location::scula2 + 1] = rom[Location::scula + 1];
 
 	AsmAndData();
 
