@@ -169,8 +169,10 @@ void AsmAndData()
 		std::copy(code.begin(), code.end(), rom.begin() + offset);
 	}
 
+	rom[0x016ADF] = 0x10; //reduce wait time on picking up crest powers
+
 	rom[0x02A22E] = 0x01; //was -1, enable stages 5 & 6 from the start
-	rom[0x02A246] = 0x01; //was 2, enable stages 5 & 6 instead of phalanx 1
+	rom[0x02A246] = 0x01; //was  2, enable stages 5 & 6 instead of phalanx 1
 
 	for(const auto [loc, locData] : locationData)
 	{
