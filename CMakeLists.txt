@@ -7,7 +7,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -static")
 
 set(source_files
 	src/main.cpp
-	src/random.cpp
 	src/file.cpp
 	)
 

@@ -57,6 +57,7 @@ int main(int argc, char* argv[])
 
 	rng.Init(seed);
 	rng.Randomize(itemList);
+	rng.Randomize(locationList);
 
 	uint8_t currentAbilities = 0;
 	bool reqLocationsFilled = false;
@@ -223,7 +224,7 @@ void PrintLocations()
 			const std::string &locationName = locationData.at(loc).name;
 			const std::string &itemName = itemData.at(item).name;
 
-			logFile << std::setw(14) << std::left << locationName << " | " << itemName << "\n";
+			logFile << std::setw(27) << std::left << locationName << " | " << itemName << "\n";
 		}
 		logFile << "\n";
 	}
