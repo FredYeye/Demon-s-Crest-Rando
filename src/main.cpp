@@ -192,7 +192,7 @@ void AsmAndData()
 		std::copy(code.begin(), code.end(), rom.begin() + offset);
 	}
 
-	rom[0x016ADF] = 0x10; //reduce wait time on picking up crest powers
+	rom[0x016ADF] = 0x40; //reduce wait time on picking up crest powers
 
 	rom[0x02A22E] = 0x01; //was -1, enable stages 5 & 6 from the start
 	rom[0x02A246] = 0x01; //was  2, enable stages 5 & 6 instead of phalanx 1
@@ -211,17 +211,22 @@ void AsmAndData()
 			continue;
 		}
 
-		if(locationData.at(loc).shouldExit) //update item to exit area/stage if necessary
+		if(locData.shouldExit) //update item to exit area/stage if necessary
 		{
-			switch(rom[loc])
+			int offset  = (loc == Location::grewon) ? 3 : 0;
+			int offset2 = (loc == Location::grewon) ? 0 : 1;
+
+			switch(rom[loc + offset])
 			{
-				case 0x2D: rom[0x1FD547 + ((rom[loc + 1] & ~0x40) >> 1)] = 1; break;
-				case 0x2E: rom[0x1FD5D5 + ((rom[loc + 1] & ~0x40) >> 1)] = 1; break;
-				case 0x48: rom[0x1FD597 + ((rom[loc + 1] & ~0x40) >> 1)] = 2; break;
-				case 0x49: rom[(0x1FD500 - 1) + (rom[loc + 1] & ~0x40)]  = 1; break;
+				case 0x2D: rom[0x1FD547 + ((rom[loc + offset2] & ~0x40) >> 1)] = 1; break;
+				case 0x2E: rom[0x1FD5D5 + ((rom[loc + offset2] & ~0x40) >> 1)] = 1; break;
+				case 0x48: rom[0x1FD597 + ((rom[loc + offset2] & ~0x40) >> 1)] = 2; break;
+				case 0x49: rom[(0x1FD500 - 1) + (rom[loc + offset2] & ~0x40)]  = 1; break;
+
+				default: std::cout << "Updating exit offset failed at location " << locData.name << "\n";
 			}
 		}
-		else if(rom[loc] == 0x48)
+		else if(rom[loc] == 0x48) //set powerups to not exit
 		{
 			rom[0x1FD597 + ((rom[loc + 1] & ~0x40) >> 1)] = 6;
 		}
