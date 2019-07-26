@@ -9,7 +9,7 @@ class Random
         void Init(uint64_t seed);
 
         template <typename T, typename A>
-        void Randomize(std::vector<T,A> &test);
+        void Randomize(std::vector<T, A> &test);
 
     private:
         uint32_t Xoshiro256ss();
@@ -26,16 +26,16 @@ void Random::Init(uint64_t seed)
 	smstate = seed;
 
 	uint64_t tmp = Splitmix64();
-	s[0] = (uint32_t)tmp;
-	s[1] = (uint32_t)(tmp >> 32);
+	s[0] = tmp;
+	s[1] = tmp >> 32;
 
 	tmp = Splitmix64();
-	s[2] = (uint32_t)tmp;
-	s[3] = (uint32_t)(tmp >> 32);
+	s[2] = tmp;
+	s[3] = tmp >> 32;
 }
 
 template <typename T, typename A>
-void Random::Randomize(std::vector<T,A> &test)
+void Random::Randomize(std::vector<T, A> &test)
 {
     for(int i = test.size() - 1; i > 0; --i)
     {

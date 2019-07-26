@@ -63,6 +63,8 @@ int main(int argc, char* argv[])
 	bool reqLocationsFilled = false;
 
 	int iLoc = 0, iItem = 0;
+	int loopCounter = 0; //break loop if it takes too long; something went wrong
+
 	while(locationList.size() > 0)
 	{
 		const uint32_t &location = locationList[iLoc];
@@ -144,9 +146,30 @@ int main(int argc, char* argv[])
 					{
 						reqLocationsFilled |= !locationData.at(loc).requirement;
 					}
+
+					if(++loopCounter > 2000)
+					{
+						std::cout << "Item-location pairing process has locked!\nRemaining items:\n";
+						for(const auto v : itemList)
+						{
+							std::cout << "  " << itemData.at(v).name << "\n";
+						}
+						std::cout << "Remaining locations:\n";
+						for(const auto v : locationList)
+						{
+							std::cout << "  " << locationData.at(v).name << "\n";
+						}
+						break;
+					}
 				}
 			}
 		}
+	}
+
+	if(loopCounter > 2000)
+	{
+		std::cin.get();
+		exit(0);
 	}
 
 	//scula head & body are considered different entities and have different drops. copy to other part

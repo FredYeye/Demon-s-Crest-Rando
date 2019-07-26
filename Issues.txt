@@ -4,4 +4,21 @@ the hp item doesn't have a disable toggle, so you can keep picking up the replac
 
 resolve remaining softlocks (stage 6 statues for example)
 
-under rare circumstances, item-location pairing can lock up. investigate
+under rare circumstances, item-location pairing can lock up. example:
+
+No custom seed supplied, generating seed: 1564103277733612200
+Item-location pairing process has locked!
+Remaining items:
+  Earth crest
+  Buster
+  Water Crest
+  Air Crest
+  Time Crest
+  Tornado
+Remaining locations:
+  Stage 5 hp (water route)
+  Ovnunu
+  Stage 2 hp (bone pile)
+  Vellum (s3)
+  Armor
+  Stage 5 hp (above crawler)
