@@ -1,11 +1,10 @@
 replacement items have corrupted graphics.
 
-the hp item doesn't have a disable toggle, so you can keep picking up the replacement item. custom code needed.
+the hp item doesn't have a disable toggle, so you can keep picking up the replacement item. custom code needed. i think.
 
 resolve remaining softlocks (stage 6 statues for example)
 
 under rare circumstances, item-location pairing can lock up. example:
-
 No custom seed supplied, generating seed: 1564103277733612200
 Item-location pairing process has locked!
 Remaining items:

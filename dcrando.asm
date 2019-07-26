@@ -3,8 +3,11 @@ lorom
 ;determine if hp up will exit area/stage
 {
     org $82EAC8 : exit_stage: ;0x016AC8
+    org $82EAE3 : big_health_exit: ;0x016AE3
 
     org $82EB22 ;0x016B22
+        cmp #$1F ;check if this is a big health with exit properties first, since A gets clobbered
+        beq big_health_exit
         tax
         lda.l exit_values-1,X
         bne exit_stage
