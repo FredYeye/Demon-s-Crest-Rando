@@ -2,6 +2,6 @@ replacement items have corrupted graphics.
 
 the hp item doesn't have a disable toggle, so you can keep picking up the replacement item. custom code needed.
 
-requirements to make the game completable.
+resolve remaining softlocks (stage 6 statues for example)
 
-custom code to let talismans exit area.
+under rare circumstances, item-location pairing can lock up. investigate

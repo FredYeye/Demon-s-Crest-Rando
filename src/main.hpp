@@ -29,6 +29,7 @@ namespace Item
         hp9  = 0x0949, //stage 2 bone pile
         hp10 = 0x0A49,
         hp11 = 0x0B49, //stage 3 water route
+        hp12 = 0x0C49, //trio the pago
         hp13 = 0x0D49, //stage 5 water route
         hp14 = 0x0E49,
         hp15 = 0x0F49, //stage 6
@@ -97,6 +98,8 @@ namespace Location
         stage6_Vellum = 0x00B50F,
         arma3         = 0x017009,
         grewon        = 0x1F1E23,
+
+        trioThePago   = 0x1E213E,
     };
 }
 
@@ -170,6 +173,7 @@ const std::map<uint16_t, ItemData> itemData
     {Item::hp9,           {4, 0b0000'0001,      0, "Hp 9"}},
     {Item::hp10,          {4, 0b0000'0010,      0, "Hp 10"}},
     {Item::hp11,          {4, 0b0000'0100,      0, "Hp 11"}},
+    {Item::hp12,          {4, 0b0000'1000,      0, "Hp 12"}},
     {Item::hp13,          {4, 0b0001'0000,      0, "Hp 13"}},
     {Item::hp14,          {4, 0b0010'0000,      0, "Hp 14"}},
     {Item::hp15,          {4, 0b0100'0000,      0, "Hp 15"}},
@@ -230,6 +234,8 @@ const std::map<uint32_t, LocationData> locationData
     {Location::stage6_Vellum, {0, 0, 0b0010,        0, "Vellum (s6)"}},
     {Location::arma3,         {1, 1, 0b0100,   0x8137, "Arma 3"}},
     {Location::grewon,        {1, 0,      0,   0x8135, "Grewon"}},
+
+    {Location::trioThePago,   {0, 1,      0,        0, "Trio the Pago"}},
 };
 
 const std::map<uint32_t, std::vector<uint8_t>> customAsm
@@ -303,5 +309,8 @@ const std::vector<std::vector<uint32_t>> printOrder
         Location::stage6_Vellum,
         Location::arma3,
         Location::grewon,
-    }
+    },
+    {
+        Location::trioThePago,
+    },
 };

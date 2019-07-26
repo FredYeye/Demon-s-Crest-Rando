@@ -174,6 +174,9 @@ void AsmAndData()
 	rom[0x02A22E] = 0x01; //was -1, enable stages 5 & 6 from the start
 	rom[0x02A246] = 0x01; //was  2, enable stages 5 & 6 instead of phalanx 1
 
+	rom[0x1E2045] = 0xB8; //change trio the pago timer, 40s -> 50s
+	rom[0x1E2046] = 0x0B; //^
+
 	for(const auto [loc, locData] : locationData)
 	{
 		if(loc == Location::crawler)
