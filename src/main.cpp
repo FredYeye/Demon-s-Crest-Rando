@@ -235,8 +235,8 @@ void AsmAndData()
 	{
 		if(locData.shouldExit) //update item to exit area/stage if necessary
 		{
-			int offset  = (loc == Location::grewon) ? 3 : 0;
-			int offset2 = (loc == Location::grewon) ? 0 : 1;
+			uint8_t offset  = (loc == Location::grewon || loc == Location::crawler) ? 3 : 0;
+			uint8_t offset2 = (loc == Location::grewon || loc == Location::crawler) ? 0 : 1;
 
 			switch(rom[loc + offset])
 			{
