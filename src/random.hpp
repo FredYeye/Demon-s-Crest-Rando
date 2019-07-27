@@ -9,7 +9,7 @@ class Random
         void Init(uint64_t seed);
 
         template <typename T, typename A>
-        void Randomize(std::vector<T, A> &test);
+        void Randomize(std::vector<T, A> &vec);
 
     private:
         uint32_t Xoshiro256ss();
@@ -35,11 +35,11 @@ void Random::Init(uint64_t seed)
 }
 
 template <typename T, typename A>
-void Random::Randomize(std::vector<T, A> &test)
+void Random::Randomize(std::vector<T, A> &vec)
 {
-    for(int i = test.size() - 1; i > 0; --i)
+    for(int i = vec.size() - 1; i > 0; --i)
     {
-        std::swap(test[i], test[Xoshiro256ss() % (i+1)]);
+        std::swap(vec[i], vec[Xoshiro256ss() % (i+1)]);
     }
 }
 

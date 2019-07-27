@@ -131,16 +131,22 @@ struct LocationData
     std::string name;
 };
 
+struct ItemLocationPair
+{
+    uint16_t item;
+    uint32_t location;
+};
 
+
+std::vector<ItemLocationPair> PlaceItems();
+void StoreNewItemPlacements();
 void AsmAndData();
 void PrintLocations();
 
 uint64_t seed = 0;
 Random rng;
 std::vector<uint8_t> rom;
-std::vector<uint16_t> itemList;
-std::vector<uint32_t> locationList;
-
+std::vector<ItemLocationPair> itemLocPairs;
 uint8_t crawlerOffset, crawlerBit;
 
 const std::map<uint16_t, ItemData> itemData

@@ -11,54 +11,82 @@
 
 int main(int argc, char* argv[])
 {
+	if(itemData.size() != locationData.size()) //should never happen on release
+	{
+		std::cout << "item and location counts do not match (" << itemData.size() << " items, " << locationData.size() << " locations)\nPress any key to exit\n";
+		std::cin.get();
+		exit(0);
+	}
+
 	std::string fileName = "Demon's Crest (USA).sfc";
 
-	// if(argc >= 2)
-	// {
-		// // todo: convert secondary value to uint64 and use as seed
-		// seed = 
-		// // todo: use param to override default rom name
+	if(argc >= 3)
+	{
+		for(int x = 1; x < argc - 1; ++x)
+		{
+			if(std::string(argv[x]) == "-s")
+			{
+				try
+				{
+					seed = std::stoull(argv[x + 1], 0, 10);
+				}
+				catch(std::invalid_argument &e)
+				{
+					std::cout << "Failed to convert supplied seed (first character need to be a number for now).\n";
+					seed = 0;
+				}
+			}
+		}
+		// todo: use param to override default rom name
 		// fileName = argv[];
-	// }
+	}
+	else
+	{
+		std::cout << "\nDemon's Crest Randomizer\nOptions:\n-s [numbers]: custom seed\n\n";
+	}
 
 	rom = FileToU8Vec(fileName);
 
-	if(rom[0x007FC8] != 0x63)
+	if(rom[0x007FC8] != 0x63) //crude check to make sure this is a valid rom
 	{
-		std::cout << "needs a US rom to work for now\n";
+		std::cout << "needs a US rom to work for now\nPress any key to exit\n";
 		std::cin.get();
 		exit(0);
 	}
 
     if(!seed)
 	{
-		std::cout << "No custom seed supplied, generating seed: ";
+		std::cout << "No custom seed supplied, generating seed.\n";
 		std::chrono::high_resolution_clock::time_point now = std::chrono::high_resolution_clock::now();
 		seed = std::chrono::duration_cast<std::chrono::nanoseconds>(now.time_since_epoch()).count();
-		std::cout << seed << "\n";
 	}
+	std::cout << "Seed: " << seed << "\n";
 
-	for(const auto kv : itemData)
-	{
-		itemList.push_back(kv.first);
-	}
+	itemLocPairs = PlaceItems();
+	StoreNewItemPlacements();
+	AsmAndData();
+	U8vecToFile(rom, "DCRando.sfc"); //hmm. need to change checksum or anything? investigate
+	PrintLocations();
 
-	for(const auto kv : locationData)
-	{
-		locationList.push_back(kv.first);
-	}
+	std::cout << "\nDone!\n";
+}
 
-	if(itemList.size() != locationList.size())
-	{
-		std::cout << "item and location count doesn't match (" << itemList.size() << " items, " << locationList.size() << " locations)\n";
-		std::cin.get();
-		exit(0);
-	}
+
+std::vector<ItemLocationPair> PlaceItems()
+{
+	std::vector<ItemLocationPair> itemLocPairs;
+
+	//create lists of all items and locations and shuffle them
+	std::vector<uint16_t> itemList;
+	std::vector<uint32_t> locationList;
+	for(const auto [key, value] : itemData)     {itemList.push_back(key);    }
+	for(const auto [key, value] : locationData) {locationList.push_back(key);}
 
 	rng.Init(seed);
 	rng.Randomize(itemList);
 	rng.Randomize(locationList);
 
+	//pairing/loop variables
 	uint8_t currentAbilities = 0;
 	bool reqLocationsFilled = false;
 
@@ -77,110 +105,108 @@ int main(int argc, char* argv[])
 
 		if
 		(
-			locRequirement &&  //if location has a requirement, and
-			abilityReqMet  ||  //requirement is met, or
-			!itemAbility   ||  //ability isn't needed.
-			reqLocationsFilled //lastly, fill locations without requirements
+			locRequirement &&                    //if location has a requirement, and
+			(abilityReqMet  || !itemAbility) ||  //requirement is met, or ability isn't needed.
+			reqLocationsFilled                   //lastly, fill locations without requirements
 		)
 		{
-			if(location == Location::crawler || location == Location::grewon)
-			{
-				rom[location    ] = item >> 8;
-				rom[location + 3] = item;
-			}
-			else //default
-			{
-				rom[location    ] = item;
-				rom[location + 1] = item >> 8;
-
-				if(locationData.at(location).noBounce)
-				{
-					rom[location + 1] |= 0x40; // or item value with 0x4000 to stop item bounce
-				}
-			}
-
-			if(const uint32_t &offset = locationData.at(location).bossDefeatedOffset; offset != 0)
-			{
-				if(location == Location::crawler) //crawler special case
-				{
-					rom[offset    ] = itemData.at(item).completionCheckOffset;
-					rom[offset + 6] = itemData.at(item).completionCheckBit;
-					crawlerOffset = rom[offset];
-					crawlerBit = rom[offset + 6];
-				}
-				else if(location == Location::ovnunu) //ovnunu special case
-				{
-					rom[offset    ] = 0x51 + itemData.at(item).completionCheckOffset;
-					rom[offset + 3] = itemData.at(item).completionCheckBit;
-				}
-				else //default
-				{
-					rom[offset    ] = itemData.at(item).completionCheckOffset;
-					rom[offset + 1] = itemData.at(item).completionCheckBit;
-				}
-
-				if(location == Location::arma3) //needs additional location fix
-				{
-					rom[0x1F63E2] = 0x51 + itemData.at(item).completionCheckOffset;
-					rom[0x1F63E5] = itemData.at(item).completionCheckBit;
-				}
-			}
-
-			currentAbilities |= itemAbility;
-
+			//an item and location has successfully been paired. remove from lists and start over
+			itemLocPairs.push_back({item, location});
 			locationList.erase(locationList.begin() + iLoc);
 			itemList.erase(itemList.begin() + iItem);
 			iLoc = 0;
 			iItem = 0;
+
+			currentAbilities |= itemAbility;
 		}
-		else //failed to place item
+		else
 		{
 			if(++iItem >= itemList.size()) //try next item, unless we've tried every item
 			{
 				iItem = 0;
-				if(++iLoc >= locationList.size()) //try next location
+
+				if(++iLoc >= locationList.size()) //try next location, until we've tried all
 				{
 					iLoc = 0;
 
+					//check if all locations with requirements are filled. enable free spots if so
+					bool stillReqStages  = false;
 					for(const uint32_t loc : locationList)
 					{
-						reqLocationsFilled |= !locationData.at(loc).requirement;
+						stillReqStages |= locationData.at(loc).requirement;
 					}
+					reqLocationsFilled = !stillReqStages;
 
-					if(++loopCounter > 2000)
+					if(++loopCounter > 2000) //loop has stalled. abort
 					{
 						std::cout << "Item-location pairing process has locked!\nRemaining items:\n";
-						for(const auto v : itemList)
-						{
-							std::cout << "  " << itemData.at(v).name << "\n";
-						}
+						for(const auto v : itemList)     {std::cout << "  " << itemData.at(v).name     << "\n";}
 						std::cout << "Remaining locations:\n";
-						for(const auto v : locationList)
-						{
-							std::cout << "  " << locationData.at(v).name << "\n";
-						}
-						break;
+						for(const auto v : locationList) {std::cout << "  " << locationData.at(v).name << "\n";}
+						std::cout << "Press any key to exit\n";
+						std::cin.get();
+						exit(0);
 					}
 				}
 			}
 		}
 	}
 
-	if(loopCounter > 2000)
+	return itemLocPairs;
+}
+
+
+void StoreNewItemPlacements()
+{
+	for(const ItemLocationPair il : itemLocPairs)
 	{
-		std::cin.get();
-		exit(0);
+		if(il.location == Location::crawler || il.location == Location::grewon)
+		{
+			rom[il.location    ] = il.item >> 8;
+			rom[il.location + 3] = il.item;
+		}
+		else //default
+		{
+			rom[il.location    ] = il.item;
+			rom[il.location + 1] = il.item >> 8;
+
+			if(locationData.at(il.location).noBounce)
+			{
+				rom[il.location + 1] |= 0x40; // or item value with 0x4000 to stop item bounce
+			}
+		}
+
+		if(const uint32_t &offset = locationData.at(il.location).bossDefeatedOffset; offset != 0)
+		{
+			if(il.location == Location::crawler) //crawler special case
+			{
+				rom[offset    ] = itemData.at(il.item).completionCheckOffset;
+				rom[offset + 6] = itemData.at(il.item).completionCheckBit;
+				crawlerOffset = rom[offset];
+				crawlerBit = rom[offset + 6];
+			}
+			else if(il.location == Location::ovnunu) //ovnunu special case
+			{
+				rom[offset    ] = 0x51 + itemData.at(il.item).completionCheckOffset;
+				rom[offset + 3] = itemData.at(il.item).completionCheckBit;
+			}
+			else //default
+			{
+				rom[offset    ] = itemData.at(il.item).completionCheckOffset;
+				rom[offset + 1] = itemData.at(il.item).completionCheckBit;
+			}
+
+			if(il.location == Location::arma3) //needs additional location fix
+			{
+				rom[0x1F63E2] = 0x51 + itemData.at(il.item).completionCheckOffset;
+				rom[0x1F63E5] = itemData.at(il.item).completionCheckBit;
+			}
+		}
 	}
 
 	//scula head & body are considered different entities and have different drops. copy to other part
 	rom[Location::scula2] = rom[Location::scula];
 	rom[Location::scula2 + 1] = rom[Location::scula + 1];
-
-	AsmAndData();
-
-	U8vecToFile(rom, "DCRando.sfc"); //hmm. need to change checksum or anything? investigate
-
-	PrintLocations();
 }
 
 
@@ -200,17 +226,13 @@ void AsmAndData()
 	rom[0x1E2045] = 0xB8; //change trio the pago timer, 40s -> 50s
 	rom[0x1E2046] = 0x0B; //^
 
+	//crawler's item data gets overwritten by the custom asm injection. re-add
+	const uint32_t &crawlerFix = locationData.at(Location::crawler).bossDefeatedOffset;
+	rom[crawlerFix] = crawlerOffset;
+	rom[crawlerFix + 6] = crawlerBit;
+
 	for(const auto [loc, locData] : locationData)
 	{
-		if(loc == Location::crawler)
-		{
-			//crawler's item data gets overwritten by the custom asm injection. re-add
-			const uint32_t &crawlerFix = locData.bossDefeatedOffset;
-			rom[crawlerFix] = crawlerOffset;
-			rom[crawlerFix + 6] = crawlerBit;
-			continue;
-		}
-
 		if(locData.shouldExit) //update item to exit area/stage if necessary
 		{
 			int offset  = (loc == Location::grewon) ? 3 : 0;
