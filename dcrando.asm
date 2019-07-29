@@ -95,3 +95,27 @@ lorom
 
     talisman_exit_list: ;DCRando will fill in these
 }
+
+;change stage reveal requirements
+{
+    ;85A1EE: beginning of stage requirement function
+    org $85A1F6 ;0x02A1F6
+        bne .no_phalanx
+        ldy #$03
+        lda $1E51
+        bit #$0100
+        bne .ret
+
+        ldy #$00
+        lda $1E56
+        and #$001F
+        cmp #$001F
+        beq .ret
+
+    .no_phalanx:
+        ldy #$01
+
+    .ret:
+        sep #$20
+        rtl
+}

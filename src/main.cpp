@@ -36,13 +36,15 @@ int main(int argc, char* argv[])
 					seed = 0;
 				}
 			}
+			else if(std::string(argv[x]) == "-i")
+			{
+				fileName = argv[x + 1]; //untested
+			}
 		}
-		// todo: use param to override default rom name
-		// fileName = argv[];
 	}
 	else
 	{
-		std::cout << "\nDemon's Crest Randomizer\nOptions:\n-s [numbers]: custom seed\n\n";
+		std::cout << "\nDemon's Crest Randomizer\nOptions:\n  -s [numbers]: custom seed\n  -i [name]: file to look for\n\n";
 	}
 
 	rom = FileToU8Vec(fileName);
@@ -65,7 +67,7 @@ int main(int argc, char* argv[])
 	itemLocPairs = PlaceItems();
 	StoreNewItemPlacements();
 	AsmAndData();
-	U8vecToFile(rom, "DCRando.sfc"); //hmm. need to change checksum or anything? investigate
+	U8vecToFile(rom, "DCRando.sfc");
 	PrintLocations();
 
 	std::cout << "\nDone!\n";
@@ -219,9 +221,6 @@ void AsmAndData()
 	}
 
 	rom[0x016ADF] = 0x40; //reduce wait time on picking up crest powers
-
-	rom[0x02A22E] = 0x01; //was -1, enable stages 5 & 6 from the start
-	rom[0x02A246] = 0x01; //was  2, enable stages 5 & 6 instead of phalanx 1
 
 	rom[0x1E2045] = 0xB8; //change trio the pago timer, 40s -> 50s
 	rom[0x1E2046] = 0x0B; //^
