@@ -180,14 +180,14 @@ void StoreNewItemPlacements()
 
 		if(const uint32_t &offset = locationData.at(il.location).bossDefeatedOffset; offset != 0)
 		{
-			if(il.location == Location::crawler) //crawler special case
+			if(il.location == Location::crawler)
 			{
 				rom[offset    ] = itemData.at(il.item).completionCheckOffset;
 				rom[offset + 6] = itemData.at(il.item).completionCheckBit;
 				crawlerOffset = rom[offset];
 				crawlerBit = rom[offset + 6];
 			}
-			else if(il.location == Location::ovnunu) //ovnunu special case
+			else if(il.location == Location::ovnunu || il.location == Location::trioThePago)
 			{
 				rom[offset    ] = 0x51 + itemData.at(il.item).completionCheckOffset;
 				rom[offset + 3] = itemData.at(il.item).completionCheckBit;
@@ -205,6 +205,9 @@ void StoreNewItemPlacements()
 			}
 		}
 	}
+
+	//clear upper byte of trio the pago completion check bit
+	rom[Location::trioThePago + 4] = 0;
 
 	//scula head & body are considered different entities and have different drops. copy to other part
 	rom[Location::scula2] = rom[Location::scula];

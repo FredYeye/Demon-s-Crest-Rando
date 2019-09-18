@@ -241,7 +241,7 @@ const std::map<uint32_t, LocationData> locationData
     {Location::arma3,         {1, 1, 0b0100,   0x8137, "Arma 3"}},
     {Location::grewon,        {1, 0,      0,   0x8135, "Grewon"}},
 
-    {Location::trioThePago,   {0, 1,      0,        0, "Trio the Pago"}},
+    {Location::trioThePago,   {0, 1,      0, 0x1E2AED, "Trio the Pago"}},
 };
 
 const std::map<uint32_t, std::vector<uint8_t>> customAsm
