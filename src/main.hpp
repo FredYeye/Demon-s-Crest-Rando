@@ -5,10 +5,8 @@
 #include "random.hpp"
 
 
-namespace Item
-{
-    enum Item : uint16_t
-    {
+namespace Item {
+    enum Item : uint16_t {
         buster     = 0x0048,
         tornado    = 0x0248,
         claw       = 0x0448,
@@ -52,10 +50,8 @@ namespace Item
     };
 }
 
-namespace Location
-{
-    enum Locations : uint32_t
-    {
+namespace Location {
+    enum Locations : uint32_t {
         stage1_Vellum = 0x00B4FD,
         stage1_Hp     = 0x0251A3,
         stage1_Potion = 0x02511E,
@@ -103,10 +99,8 @@ namespace Location
     };
 }
 
-namespace Requirement
-{
-    enum Requirements : uint8_t
-    {
+namespace Requirement {
+    enum Requirements : uint8_t {
         buster = 0b0000'0001, //buster & legendary
         ground = 0b0000'0010, //dash into breakable objects
         flight = 0b0000'0100, //air crest & tornado
@@ -114,16 +108,14 @@ namespace Requirement
     };
 }
 
-struct ItemData
-{
+struct ItemData {
     uint8_t completionCheckOffset;
     uint8_t completionCheckBit;
     uint8_t ability;
     std::string name;
 };
 
-struct LocationData
-{
+struct LocationData {
     bool shouldExit;
     bool noBounce;
     uint8_t requirement;
@@ -131,8 +123,7 @@ struct LocationData
     std::string name;
 };
 
-struct ItemLocationPair
-{
+struct ItemLocationPair {
     uint16_t item;
     uint32_t location;
 };
@@ -149,8 +140,7 @@ std::vector<uint8_t> rom;
 std::vector<ItemLocationPair> itemLocPairs;
 uint8_t crawlerOffset, crawlerBit;
 
-const std::map<uint16_t, ItemData> itemData
-{
+const std::map<uint16_t, ItemData> itemData {
     {Item::buster,        {0, 0b0000'0001, 0b0001, "Buster"}},
     {Item::tornado,       {0, 0b0000'0010, 0b0100, "Tornado"}},
     {Item::claw,          {0, 0b0000'0100,      0, "Claw"}},
@@ -197,8 +187,7 @@ const std::map<uint16_t, ItemData> itemData
     {Item::stage6_Potion, {6, 0b0000'0010,      0, "Potion (s6)"}},
 };
 
-const std::map<uint32_t, LocationData> locationData
-{
+const std::map<uint32_t, LocationData> locationData {
     {Location::stage1_Vellum, {0, 0,      0,        0, "Vellum (s1)"}},
     {Location::stage1_Hp,     {0, 1, 0b0001,        0, "Stage 1 hp"}},
     {Location::stage1_Potion, {0, 1,      0,        0, "Potion (s1)"}},
@@ -244,8 +233,7 @@ const std::map<uint32_t, LocationData> locationData
     {Location::trioThePago,   {0, 1,      0, 0x1E2AED, "Trio the Pago"}},
 };
 
-const std::map<uint32_t, std::vector<uint8_t>> customAsm
-{
+const std::map<uint32_t, std::vector<uint8_t>> customAsm {
     //HP exits area/stage check
     {0x016B22, {0xC9, 0x1F, 0xF0, 0xBD, 0xAA, 0xBF, 0xFF, 0xD4, 0xBF, 0xD0, 0x9B, 0xEA}},
 
@@ -269,8 +257,7 @@ const std::map<uint32_t, std::vector<uint8_t>> customAsm
     {0x02A1F6 ,{0xD0, 0x15, 0xA0, 0x03, 0xAD, 0x51, 0x1E, 0x89, 0x00, 0x01, 0xD0, 0x0D, 0xA0, 0x00, 0xAD, 0x56, 0x1E, 0x29, 0x1F, 0x00, 0xC9, 0x1F, 0x00, 0xF0, 0x02, 0xA0, 0x01, 0xE2, 0x20, 0x6B}},
 };
 
-const std::vector<std::vector<uint32_t>> printOrder
-{
+const std::vector<std::vector<uint32_t>> printOrder {
     {
         Location::stage1_Vellum,
         Location::stage1_Hp,

@@ -3,8 +3,7 @@
 #include <array>
 
 
-class Random
-{
+class Random {
     public:
         void Init(uint64_t seed);
 
@@ -21,8 +20,7 @@ class Random
 };
 
 
-void Random::Init(uint64_t seed)
-{
+void Random::Init(uint64_t seed) {
 	smstate = seed;
 
 	uint64_t tmp = Splitmix64();
@@ -35,16 +33,13 @@ void Random::Init(uint64_t seed)
 }
 
 template <typename T, typename A>
-void Random::Randomize(std::vector<T, A> &vec)
-{
-    for(int i = vec.size() - 1; i > 0; --i)
-    {
+void Random::Randomize(std::vector<T, A> &vec) {
+    for(int i = vec.size() - 1; i > 0; --i) {
         std::swap(vec[i], vec[Xoshiro256ss() % (i+1)]);
     }
 }
 
-uint32_t Random::Xoshiro256ss()
-{
+uint32_t Random::Xoshiro256ss() {
 	const uint64_t result = Rol64(s[1] * 5, 7) * 9;
 
 	const uint64_t t = s[1] << 17;
@@ -61,13 +56,11 @@ uint32_t Random::Xoshiro256ss()
 	return result >> 32;
 }
 
-uint64_t Random::Rol64(uint64_t x, int k)
-{
+uint64_t Random::Rol64(uint64_t x, int k) {
 	return (x << k) | (x >> (64 - k));
 }
 
-uint64_t Random::Splitmix64()
-{
+uint64_t Random::Splitmix64() {
 	smstate += 0x9E3779B97F4A7C15;
 
 	uint64_t result = smstate;
