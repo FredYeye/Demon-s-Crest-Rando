@@ -265,8 +265,7 @@ const std::vector<std::vector<uint32_t>> printOrder {
         Location::somulo,
         Location::hippogriff1,
         Location::arma1,
-    },
-    {
+    }, {
         Location::stage2_Potion,
         Location::hand,
         Location::stage2_Vellum,
@@ -274,8 +273,7 @@ const std::vector<std::vector<uint32_t>> printOrder {
         Location::stage2_Hp1,
         Location::belth,
         Location::ovnunu,
-    },
-    {
+    }, {
         Location::stage3_Potion,
         Location::stage3_Vellum,
         Location::stage3_Hp1,
@@ -283,30 +281,26 @@ const std::vector<std::vector<uint32_t>> printOrder {
         Location::skull,
         Location::flameLord,
         Location::scula,
-    },
-    {
+    }, {
         Location::stage4_Potion,
         Location::stage4_Vellum,
         Location::crown,
         Location::flier,
         Location::arma2,
-    },
-    {
+    }, {
         Location::stage5_Hp1,
         Location::stage5_Hp2,
         Location::stage5_Hp3,
         Location::crawler,
         Location::holothurion,
-    },
-    {
+    }, {
         Location::stage6_Potion,
         Location::stage6_Hp,
         Location::armor,
         Location::stage6_Vellum,
         Location::arma3,
         Location::grewon,
-    },
-    {
+    }, {
         Location::trioThePago,
     },
 };
