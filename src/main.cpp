@@ -3,7 +3,6 @@
 #include <iostream>
 #include <iomanip>
 #include <chrono>
-#include <algorithm>
 
 #include "main.hpp"
 #include "file.hpp"
@@ -21,19 +20,15 @@ int main(int argc, char* argv[]) {
     if(argc >= 3) {
         for(int x = 1; x < argc - 1; ++x) {
             if(std::string(argv[x]) == "-s") {
-                try {
-                    seed = std::stoull(argv[x + 1], 0, 10);
-                } catch(std::invalid_argument &e) {
-                    std::cout << "Failed to convert supplied seed (first character need to be a number for now).\n";
-                    seed = 0;
-                }
+                seed = std::hash<std::string>{}(argv[x+1]);
             } else if(std::string(argv[x]) == "-i") {
                 fileName = argv[x + 1]; //untested
             }
         }
-    } else {
-        std::cout << "\nDemon's Crest Randomizer\nOptions:\n  -s [numbers]: custom seed\n  -i [name]: file to look for\n\n";
     }
+
+    std::cout << "\nDemon's Crest Randomizer\n\nOptions:\n  -s [any characters]: custom seed. If none is supplied, one will be generated.\n  -i [name]: file to look for. If no name is suppied, \"Demon's Crest (USA).sfc\" will be used.\n\n";
+    std::cout << "Example:\n  DCRando -s \"Give me the hand talisman in stage 1 pls!\"\n\n==========\n\n";
 
     rom = FileToU8Vec(fileName);
 
@@ -70,8 +65,8 @@ std::vector<ItemLocationPair> PlaceItems() {
     for(const auto [key, value] : locationData) {locationList.push_back(key);}
 
     rng.Init(seed);
-    rng.Randomize(itemList);
-    rng.Randomize(locationList);
+    rng.Shuffle(itemList);
+    rng.Shuffle(locationList);
 
     //pairing/loop variables
     uint8_t currentAbilities = 0;
@@ -117,7 +112,7 @@ std::vector<ItemLocationPair> PlaceItems() {
                     }
                     reqLocationsFilled = !stillReqStages;
 
-                    if(++loopCounter > 2000) { //loop has stalled. abort
+                    if(++loopCounter > 2500) { //loop has stalled. abort
                         std::cout << "Item-location pairing process has locked!\nRemaining items:\n";
                         for(const auto v : itemList)     {std::cout << "  " << itemData.at(v).name     << "\n";}
                         std::cout << "Remaining locations:\n";

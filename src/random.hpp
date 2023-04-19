@@ -1,70 +1,75 @@
 #pragma once
 
-#include <array>
+#include <bit>
 
 
 class Random {
     public:
-        void Init(uint64_t seed);
+        void Init(const uint64_t seed);
+		uint64_t BoundedRand(const uint64_t upper_bound);
 
         template <typename T, typename A>
-        void Randomize(std::vector<T, A> &vec);
+        void Shuffle(std::vector<T, A> &vec);
 
     private:
-        uint32_t Xoshiro256ss();
-        uint64_t Rol64(uint64_t x, int k);
-        uint64_t Splitmix64();
+		void Mx3();
 
-        std::array<uint64_t, 4> s;
-        uint64_t smstate;
+		const uint64_t C = 0xBEA225F9EB34556D;
+		uint64_t counter;
+		uint64_t result;
+		int8_t unused_bits = 0;
 };
 
 
-void Random::Init(uint64_t seed) {
-	smstate = seed;
-
-	uint64_t tmp = Splitmix64();
-	s[0] = tmp;
-	s[1] = tmp >> 32;
-
-	tmp = Splitmix64();
-	s[2] = tmp;
-	s[3] = tmp >> 32;
+void Random::Init(const uint64_t seed) {
+	counter = seed + C;
+	Mx3();
 }
 
 template <typename T, typename A>
-void Random::Randomize(std::vector<T, A> &vec) {
-    for(int i = vec.size() - 1; i > 0; --i) {
-        std::swap(vec[i], vec[Xoshiro256ss() % (i+1)]);
-    }
+void Random::Shuffle(std::vector<T, A> &vec) {
+	for(int x = vec.size() - 1; x > 0; --x) {
+		const uint16_t rng = BoundedRand(x + 1);
+		std::swap(vec[rng], vec[x]);
+	}
 }
 
-uint32_t Random::Xoshiro256ss() {
-	const uint64_t result = Rol64(s[1] * 5, 7) * 9;
+void Random::Mx3() { // author: Jon Maiga
+	uint64_t x = counter++;
 
-	const uint64_t t = s[1] << 17;
+	x ^= x >> 32;
+	x *= C;
+	x ^= x >> 29;
+	x *= C;
+	x ^= x >> 32;
+	x *= C;
+	x ^= x >> 29;
 
-	s[2] ^= s[0];
-	s[3] ^= s[1];
-	s[1] ^= s[2];
-	s[0] ^= s[3];
-
-	s[2] ^= t;
-
-	s[3] = Rol64(s[3], 45);
-
-	return result >> 32;
+	unused_bits = 64;
+	result = x;
 }
 
-uint64_t Random::Rol64(uint64_t x, int k) {
-	return (x << k) | (x >> (64 - k));
-}
+uint64_t Random::BoundedRand(const uint64_t bound) { // [0, bound)
+	if(bound < 2) {
+		return 0;
+	}
 
-uint64_t Random::Splitmix64() {
-	smstate += 0x9E3779B97F4A7C15;
+	const uint8_t leading_zeros = std::countl_zero(bound - 1);
+	const uint8_t mask_size = 64 - leading_zeros;
+	const uint64_t mask = UINT64_MAX >> leading_zeros;
+	uint64_t x;
 
-	uint64_t result = smstate;
-	result = (result ^ (result >> 30)) * 0xBF58476D1CE4E5B9;
-	result = (result ^ (result >> 27)) * 0x94D049BB133111EB;
-	return result ^ (result >> 31);
+	do {
+		if(unused_bits < mask_size) {
+			Mx3();
+		}
+
+		x = result & mask;
+		result >>= mask_size;
+		unused_bits -= mask_size;
+	} while(x >= bound);
+
+	std::cout << "bound: " << bound << " got: " << x << "\n";
+
+	return x;
 }
