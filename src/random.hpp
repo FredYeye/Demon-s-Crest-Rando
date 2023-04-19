@@ -69,7 +69,5 @@ uint64_t Random::BoundedRand(const uint64_t bound) { // [0, bound)
 		unused_bits -= mask_size;
 	} while(x >= bound);
 
-	std::cout << "bound: " << bound << " got: " << x << "\n";
-
 	return x;
 }
