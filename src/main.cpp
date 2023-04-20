@@ -88,8 +88,7 @@ std::vector<ItemLocationPair> PlaceItems() {
             locRequirement &&                    //if location has a requirement, and
             (abilityReqMet  || !itemAbility) ||  //requirement is met, or ability isn't needed.
             reqLocationsFilled                   //lastly, fill locations without requirements
-        )
-        {
+        ) {
             //an item and location has successfully been paired. remove from lists and start over
             itemLocPairs.push_back({item, location});
             locationList.erase(locationList.begin() + iLoc);
@@ -106,7 +105,7 @@ std::vector<ItemLocationPair> PlaceItems() {
                     iLoc = 0;
 
                     //check if all locations with requirements are filled. enable free spots if so
-                    bool stillReqStages  = false;
+                    bool stillReqStages = false;
                     for(const uint32_t loc : locationList) {
                         stillReqStages |= locationData.at(loc).requirement;
                     }
@@ -182,8 +181,12 @@ void AsmAndData() {
 
     rom[0x016ADF] = 0x40; //reduce wait time on picking up crest powers
 
+    rom[0x018A30] = 0x04; //reduce somulo hp, 7 -> 4
+
     rom[0x1E2045] = 0xB8; //change trio the pago timer, 40s -> 50s
     rom[0x1E2046] = 0x0B; //^
+
+
 
     //crawler's item data gets overwritten by the custom asm injection. re-add
     const uint32_t &crawlerFix = locationData.at(Location::crawler).bossDefeatedOffset;
