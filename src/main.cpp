@@ -169,7 +169,7 @@ void StoreNewItemPlacements() {
     rom[Location::trioThePago + 4] = 0;
 
     //scula head & body are considered different entities and have different drops. copy to other part
-    rom[Location::scula2] = rom[Location::scula];
+    rom[Location::scula2    ] = rom[Location::scula    ];
     rom[Location::scula2 + 1] = rom[Location::scula + 1];
 }
 
@@ -196,10 +196,10 @@ void AsmAndData() {
             uint8_t offset2 = (loc == Location::grewon || loc == Location::crawler) ? 0 : 1;
 
             switch(rom[loc + offset]) {
-                case 0x2D: rom[0x1FD547 + ((rom[loc + offset2] & ~0x40) >> 1)] = 1; break;
-                case 0x2E: rom[0x1FD5D5 + ((rom[loc + offset2] & ~0x40) >> 1)] = 1; break;
-                case 0x48: rom[0x1FD597 + ((rom[loc + offset2] & ~0x40) >> 1)] = 2; break;
-                case 0x49: rom[(0x1FD500 - 1) + (rom[loc + offset2] & ~0x40)]  = 1; break;
+                case 0x2D: rom[ 0x1FD547      + ((rom[loc + offset2] & ~0x40) >> 1)] = 1; break;
+                case 0x2E: rom[ 0x1FD5D5      + ((rom[loc + offset2] & ~0x40) >> 1)] = 1; break;
+                case 0x48: rom[ 0x1FD597      + ((rom[loc + offset2] & ~0x40) >> 1)] = 2; break;
+                case 0x49: rom[(0x1FD500 - 1) +  (rom[loc + offset2] & ~0x40      )] = 1; break;
 
                 default: std::cout << "Updating exit offset failed at location " << locData.name << "\n";
             }
@@ -229,6 +229,7 @@ void PrintLocations() {
 
             logFile << std::setw(27) << std::left << locationName << " | " << itemName << "\n";
         }
+
         logFile << "\n";
     }
 
