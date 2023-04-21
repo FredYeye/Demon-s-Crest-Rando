@@ -5,108 +5,102 @@
 #include "random.hpp"
 
 
-namespace Item {
-    enum Item : uint16_t {
-        buster     = 0x0048,
-        tornado    = 0x0248,
-        claw       = 0x0448,
-        demonFire  = 0x0648,
-        earthCrest = 0x0848,
-        airCrest   = 0x0A48,
-        waterCrest = 0x0C48,
-        timeCrest  = 0x0E48,
+enum class Item : uint16_t {
+    buster     = 0x0048,
+    tornado    = 0x0248,
+    claw       = 0x0448,
+    demonFire  = 0x0648,
+    earthCrest = 0x0848,
+    airCrest   = 0x0A48,
+    waterCrest = 0x0C48,
+    timeCrest  = 0x0E48,
 
-        hp1  = 0x0149, //somulo
-        hp2  = 0x0249,
-        hp3  = 0x0349, //belth
-        hp4  = 0x0449, //scula
-        hp5  = 0x0549,
-        hp6  = 0x0649, //holothurion
-        hp7  = 0x0749,
-        hp8  = 0x0849, //stage 2 pot
-        hp9  = 0x0949, //stage 2 bone pile
-        hp10 = 0x0A49,
-        hp11 = 0x0B49, //stage 3 water route
-        hp12 = 0x0C49, //trio the pago
-        hp13 = 0x0D49, //stage 5 water route
-        hp14 = 0x0E49,
-        hp15 = 0x0F49, //stage 6
+    hp1  = 0x0149, //somulo
+    hp2  = 0x0249,
+    hp3  = 0x0349, //belth
+    hp4  = 0x0449, //scula
+    hp5  = 0x0549,
+    hp6  = 0x0649, //holothurion
+    hp7  = 0x0749,
+    hp8  = 0x0849, //stage 2 pot
+    hp9  = 0x0949, //stage 2 bone pile
+    hp10 = 0x0A49,
+    hp11 = 0x0B49, //stage 3 water route
+    hp12 = 0x0C49, //trio the pago
+    hp13 = 0x0D49, //stage 5 water route
+    hp14 = 0x0E49,
+    hp15 = 0x0F49, //stage 6
 
-        stage1_Vellum = 0x002D,
-        stage2_Vellum = 0x022D,
-        stage3_Vellum = 0x042D,
-        stage4_Vellum = 0x062D,
-        stage6_Vellum = 0x082D,
-        stage1_Potion = 0x0A2D,
-        stage2_Potion = 0x0C2D,
-        stage3_Potion = 0x0E2D,
-        stage4_Potion = 0x102D,
-        stage6_Potion = 0x122D,
+    stage1_Vellum = 0x002D,
+    stage2_Vellum = 0x022D,
+    stage3_Vellum = 0x042D,
+    stage4_Vellum = 0x062D,
+    stage6_Vellum = 0x082D,
+    stage1_Potion = 0x0A2D,
+    stage2_Potion = 0x0C2D,
+    stage3_Potion = 0x0E2D,
+    stage4_Potion = 0x102D,
+    stage6_Potion = 0x122D,
 
-        crown = 0x002E,
-        skull = 0x022E,
-        armor = 0x042E,
-        hand  = 0x082E,
-    };
-}
+    crown = 0x002E,
+    skull = 0x022E,
+    armor = 0x042E,
+    hand  = 0x082E,
+};
 
-namespace Location {
-    enum Locations : uint32_t {
-        stage1_Vellum = 0x00B4FD,
-        stage1_Hp     = 0x0251A3,
-        stage1_Potion = 0x02511E,
-        somulo        = 0x0196D3,
-        hippogriff1   = 0x011999,
-        arma1         = 0x00F0A2,
+enum class Location : uint32_t {
+    stage1_Vellum = 0x00B4FD,
+    stage1_Hp     = 0x0251A3,
+    stage1_Potion = 0x02511E,
+    somulo        = 0x0196D3,
+    hippogriff1   = 0x011999,
+    arma1         = 0x00F0A2,
 
-        stage2_Potion = 0x025259,
-        hand          = 0x0252D1,
-        stage2_Vellum = 0x00D862,
-        stage2_Hp2    = 0x00D864,
-        stage2_Hp1    = 0x00B509,
-        belth         = 0x01E8D8,
-        ovnunu        = 0x01C6D4,
+    stage2_Potion = 0x025259,
+    hand          = 0x0252D1,
+    stage2_Vellum = 0x00D862,
+    stage2_Hp2    = 0x00D864,
+    stage2_Hp1    = 0x00B509,
+    belth         = 0x01E8D8,
+    ovnunu        = 0x01C6D4,
 
-        stage3_Potion = 0x02558E,
-        stage3_Vellum = 0x00D866,
-        stage3_Hp1    = 0x026163,
-        stage3_Hp2    = 0x00D868,
-        skull         = 0x0257B1,
-        flameLord     = 0x014CFD,
-        scula         = 0x1E8B99, //head
-        scula2        = 0x1E85AD, //body
+    stage3_Potion = 0x02558E,
+    stage3_Vellum = 0x00D866,
+    stage3_Hp1    = 0x026163,
+    stage3_Hp2    = 0x00D868,
+    skull         = 0x0257B1,
+    flameLord     = 0x014CFD,
+    scula         = 0x1E8B99, //head
+    scula2        = 0x1E85AD, //body
 
-        stage4_Potion = 0x025813,
-        stage4_Vellum = 0x0259BC,
-        crown         = 0x00B505,
-        flier         = 0x02DBA0,
-        arma2         = 0x00F0A4,
+    stage4_Potion = 0x025813,
+    stage4_Vellum = 0x0259BC,
+    crown         = 0x00B505,
+    flier         = 0x02DBA0,
+    arma2         = 0x00F0A4,
 
-        stage5_Hp1    = 0x00B50D,
-        stage5_Hp2    = 0x00B50B,
-        stage5_Hp3    = 0x00D86A,
-        crawler       = 0x013A12,
-        holothurion   = 0x01D7B7,
+    stage5_Hp1    = 0x00B50D,
+    stage5_Hp2    = 0x00B50B,
+    stage5_Hp3    = 0x00D86A,
+    crawler       = 0x013A12,
+    holothurion   = 0x01D7B7,
 
-        stage6_Potion = 0x025CBC,
-        stage6_Hp     = 0x00D86C,
-        armor         = 0x00B511,
-        stage6_Vellum = 0x00B50F,
-        arma3         = 0x017009,
-        grewon        = 0x1F1E23,
+    stage6_Potion = 0x025CBC,
+    stage6_Hp     = 0x00D86C,
+    armor         = 0x00B511,
+    stage6_Vellum = 0x00B50F,
+    arma3         = 0x017009,
+    grewon        = 0x1F1E23,
 
-        trioThePago   = 0x1E213E,
-    };
-}
+    trioThePago   = 0x1E213E,
+};
 
-namespace Requirement {
-    enum Requirements : uint8_t {
-        buster = 0b0000'0001, //buster & legendary
-        ground = 0b0000'0010, //dash into breakable objects
-        flight = 0b0000'0100, //air crest & tornado
-        swim   = 0b0000'1000, //water crest
-    };
-}
+enum class Requirement : uint8_t {
+    buster = 0b0000'0001, //buster & legendary
+    ground = 0b0000'0010, //dash into breakable objects
+    flight = 0b0000'0100, //air crest & tornado
+    swim   = 0b0000'1000, //water crest
+};
 
 struct ItemData {
     uint8_t completionCheckOffset;
@@ -124,23 +118,21 @@ struct LocationData {
 };
 
 struct ItemLocationPair {
-    uint16_t item;
-    uint32_t location;
+    Item item;
+    Location location;
 };
 
 
 std::vector<ItemLocationPair> PlaceItems();
-void StoreNewItemPlacements();
+void StoreNewItemPlacements(const std::vector<ItemLocationPair> &itemLocPairs);
 void AsmAndData();
-void PrintLocations();
+void PrintLocations(uint64_t seed);
 
-uint64_t seed = 0;
 Random rng;
 std::vector<uint8_t> rom;
-std::vector<ItemLocationPair> itemLocPairs;
 uint8_t crawlerOffset, crawlerBit;
 
-const std::map<uint16_t, ItemData> itemData {
+const std::map<Item, ItemData> itemData {
     {Item::buster,        {0, 0b0000'0001, 0b0001, "Buster"}},
     {Item::tornado,       {0, 0b0000'0010, 0b0100, "Tornado"}},
     {Item::claw,          {0, 0b0000'0100,      0, "Claw"}},
@@ -187,7 +179,7 @@ const std::map<uint16_t, ItemData> itemData {
     {Item::stage6_Potion, {6, 0b0000'0010,      0, "Potion (s6)"}},
 };
 
-const std::map<uint32_t, LocationData> locationData {
+const std::map<Location, LocationData> locationData {
     {Location::stage1_Vellum, {0, 0,      0,        0, "Vellum (s1)"}},
     {Location::stage1_Hp,     {0, 1, 0b0001,        0, "Stage 1 hp"}},
     {Location::stage1_Potion, {0, 1,      0,        0, "Potion (s1)"}},
@@ -257,7 +249,7 @@ const std::map<uint32_t, std::vector<uint8_t>> customAsm {
     {0x02A1F6 ,{0xD0, 0x15, 0xA0, 0x03, 0xAD, 0x51, 0x1E, 0x89, 0x00, 0x01, 0xD0, 0x0D, 0xA0, 0x00, 0xAD, 0x56, 0x1E, 0x29, 0x1F, 0x00, 0xC9, 0x1F, 0x00, 0xF0, 0x02, 0xA0, 0x01, 0xE2, 0x20, 0x6B}},
 };
 
-const std::vector<std::vector<uint32_t>> printOrder {
+const std::vector<std::vector<Location>> printOrder {
     {
         Location::stage1_Vellum,
         Location::stage1_Hp,
