@@ -47,19 +47,19 @@ int main(int argc, char* argv[]) {
     std::cout << "Seed: " << seed << "\n";
     rng.Init(seed);
 
-    std::vector<ItemLocationPair> itemLocPairs = PlaceItems();
-    StoreNewItemPlacements(itemLocPairs);
+    PlaceItems();
+    StoreNewItemPlacements();
     AsmAndData();
+    FixGfx();
     U8vecToFile(rom, "DCRando.sfc");
+
     PrintLocations(seed);
 
     std::cout << "\nDone!\n";
 }
 
 
-std::vector<ItemLocationPair> PlaceItems() {
-    std::vector<ItemLocationPair> itemLocPairs;
-
+void PlaceItems() {
     //create lists of all items and locations and shuffle them
     std::vector<Item> itemList;
     std::vector<Location> locationList;
@@ -96,7 +96,7 @@ std::vector<ItemLocationPair> PlaceItems() {
             reqLocationsFilled                   //lastly, fill locations without requirements
         ) {
             //an item and location has successfully been paired. remove from lists and start over
-            itemLocPairs.push_back({item, location});
+            locItemPair.insert({location, item});
             locationList.erase(locationList.begin() + iLoc);
             itemList.erase(itemList.begin() + iItem);
             iLoc = 0;
@@ -130,41 +130,39 @@ std::vector<ItemLocationPair> PlaceItems() {
             }
         }
     }
-
-    return itemLocPairs;
 }
 
 
-void StoreNewItemPlacements(const std::vector<ItemLocationPair> &itemLocPairs) {
-    for(const ItemLocationPair il : itemLocPairs) {
-        if(il.location == Location::crawler || il.location == Location::grewon) {
-            rom[uint32_t(il.location)    ] = uint16_t(il.item) >> 8;
-            rom[uint32_t(il.location) + 3] = uint16_t(il.item);
+void StoreNewItemPlacements() {
+    for(const auto [loc, item] : locItemPair) {
+        if(loc == Location::crawler || loc == Location::grewon) {
+            rom[uint32_t(loc)    ] = uint16_t(item) >> 8;
+            rom[uint32_t(loc) + 3] = uint16_t(item);
         } else { //default
-            rom[uint32_t(il.location)    ] = uint16_t(il.item);
-            rom[uint32_t(il.location) + 1] = uint16_t(il.item) >> 8;
+            rom[uint32_t(loc)    ] = uint16_t(item);
+            rom[uint32_t(loc) + 1] = uint16_t(item) >> 8;
 
-            if(locationData.at(il.location).noBounce) {
-                rom[uint32_t(il.location) + 1] |= 0x40; // or item value with 0x4000 to stop item bounce
+            if(locationData.at(loc).noBounce) {
+                rom[uint32_t(loc) + 1] |= 0x40; // or item value with 0x4000 to stop item bounce
             }
         }
 
-        if(const uint32_t &offset = locationData.at(il.location).bossDefeatedOffset; offset != 0) {
-            if(il.location == Location::crawler) {
-                rom[offset    ] = itemData.at(il.item).completionCheckOffset;
-                rom[offset + 6] = itemData.at(il.item).completionCheckBit;
+        if(const uint32_t &offset = locationData.at(loc).bossDefeatedOffset; offset != 0) {
+            if(loc == Location::crawler) {
+                rom[offset    ] = itemData.at(item).completionCheckOffset;
+                rom[offset + 6] = itemData.at(item).completionCheckBit;
                 crawlerOffset = rom[offset];
                 crawlerBit = rom[offset + 6];
-            } else if(il.location == Location::ovnunu || il.location == Location::trioThePago) {
-                rom[offset    ] = 0x51 + itemData.at(il.item).completionCheckOffset;
-                rom[offset + 3] = itemData.at(il.item).completionCheckBit;
+            } else if(loc == Location::ovnunu || loc == Location::trioThePago) {
+                rom[offset    ] = 0x51 + itemData.at(item).completionCheckOffset;
+                rom[offset + 3] = itemData.at(item).completionCheckBit;
             } else { //default
-                rom[offset    ] = itemData.at(il.item).completionCheckOffset;
-                rom[offset + 1] = itemData.at(il.item).completionCheckBit;
+                rom[offset    ] = itemData.at(item).completionCheckOffset;
+                rom[offset + 1] = itemData.at(item).completionCheckBit;
 
-                if(il.location == Location::arma3) { //needs additional location fix
-                    rom[0x1F63E2] = 0x51 + itemData.at(il.item).completionCheckOffset;
-                    rom[0x1F63E5] = itemData.at(il.item).completionCheckBit;
+                if(loc == Location::arma3) { //needs additional location fix
+                    rom[0x1F63E2] = 0x51 + itemData.at(item).completionCheckOffset;
+                    rom[0x1F63E5] = itemData.at(item).completionCheckBit;
                 }
             }
         }
@@ -185,13 +183,9 @@ void AsmAndData() {
     }
 
     rom[0x016ADF] = 0x40; //reduce wait time on picking up crest powers
-
     rom[0x018A30] = 0x04; //reduce somulo hp, 7 -> 4
-
     rom[0x1E2045] = 0xB8; //change trio the pago timer, 40s -> 50s
     rom[0x1E2046] = 0x0B; //^
-
-
 
     //crawler's item data gets overwritten by the custom asm injection. re-add
     const uint32_t &crawlerFix = locationData.at(Location::crawler).bossDefeatedOffset;
@@ -225,21 +219,25 @@ void PrintLocations(uint64_t seed) {
 
     for(const auto stage : printOrder) {
         for(const auto loc : stage) {
-            Item item;
-            if(loc == Location::crawler || loc == Location::grewon) {
-                item = Item((rom[uint32_t(loc)] << 8) | rom[uint32_t(loc) + 3]);
-            } else {
-                item = Item((rom[uint32_t(loc)] | (rom[uint32_t(loc) + 1] << 8)) & ~0x4000);
-            }
-
-            const std::string &locationName = locationData.at(loc).name;
-            const std::string &itemName = itemData.at(item).name;
-
-            logFile << std::setw(27) << std::left << locationName << " | " << itemName << "\n";
+            logFile << std::setw(27) << std::left
+                    << locationData.at(loc).name << " | "
+                    << itemData.at(locItemPair.at(loc)).name << "\n";
         }
 
         logFile << "\n";
     }
 
     logFile.close();
+}
+
+void FixGfx() {
+    uint16_t itemType = uint16_t(locItemPair.at(Location::stage1_Vellum));
+    if(uint8_t(itemType) == 0x48 && (itemType >> 8) >= 0x08) {
+        //tiles to load
+        rom[0x1E9A4D    ] = 0xF4;
+        rom[0x1E9A4D + 1] = 0x00;
+
+        //update sprite list
+        rom[0x00AF15] = 0x4D;
+    }
 }

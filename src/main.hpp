@@ -117,15 +117,12 @@ struct LocationData {
     std::string name;
 };
 
-struct ItemLocationPair {
-    Item item;
-    Location location;
-};
+std::map<Location, Item> locItemPair;
 
-
-std::vector<ItemLocationPair> PlaceItems();
-void StoreNewItemPlacements(const std::vector<ItemLocationPair> &itemLocPairs);
+void PlaceItems();
+void StoreNewItemPlacements();
 void AsmAndData();
+void FixGfx();
 void PrintLocations(uint64_t seed);
 
 Random rng;
