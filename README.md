@@ -15,7 +15,9 @@ Example:
   DCRando -s "Give me the hand talisman in stage 1 pls!" -i path/to/rom.sfc
 ```
 
-## Issues
+## Issues / todo
 * Replacement items have corrupted graphics.
-* The hp item doesn't have a disable toggle, so you can keep picking up the replacement item. Custom code needed. I think.
+* The hp item doesn't have a disable toggle, so you can keep picking up the replacement item. (custom code needed?)
 * Resolve remaining softlocks (stage 6 statues for example).
+* Include the fang talisman in the randomization.
+* Improve item placement algorithm?

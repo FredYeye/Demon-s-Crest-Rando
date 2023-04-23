@@ -71,7 +71,7 @@ void PlaceItems() {
         locationList.push_back(key);
     }
 
-    rng.Shuffle(itemList);
+    rng.Shuffle(itemList); //shuffle just once or every loop?
     rng.Shuffle(locationList);
 
     //pairing/loop variables
@@ -86,19 +86,19 @@ void PlaceItems() {
         const Item &item = itemList[iItem];
 
         const uint8_t &locRequirement = locationData.at(location).requirement;
-        const uint8_t &itemAbility = itemData.at(item).ability;
+        const uint8_t &itemAbility = uint8_t(itemData.at(item).ability);
 
         const bool abilityReqMet = (locRequirement & currentAbilities == locRequirement);
 
         if(
-            locRequirement &&                    //if location has a requirement, and
-            (abilityReqMet  || !itemAbility) ||  //requirement is met, or ability isn't needed.
-            reqLocationsFilled                   //lastly, fill locations without requirements
+            locRequirement && (abilityReqMet || !itemAbility) || //if location has a requirement and is met or ability isn't needed
+            reqLocationsFilled //lastly, fill locations without requirements
         ) {
             //an item and location has successfully been paired. remove from lists and start over
             locItemPair.insert({location, item});
             locationList.erase(locationList.begin() + iLoc);
             itemList.erase(itemList.begin() + iItem);
+
             iLoc = 0;
             iItem = 0;
 
@@ -139,8 +139,7 @@ void StoreNewItemPlacements() {
             rom[uint32_t(loc)    ] = uint16_t(item) >> 8;
             rom[uint32_t(loc) + 3] = uint16_t(item);
         } else { //default
-            rom[uint32_t(loc)    ] = uint16_t(item);
-            rom[uint32_t(loc) + 1] = uint16_t(item) >> 8;
+            WriteU16(uint16_t(item), uint32_t(loc));
 
             if(locationData.at(loc).noBounce) {
                 rom[uint32_t(loc) + 1] |= 0x40; // or item value with 0x4000 to stop item bounce
@@ -183,7 +182,7 @@ void AsmAndData() {
     }
 
     rom[0x016ADF] = 0x40; //reduce wait time on picking up crest powers
-    rom[0x018A30] = 0x04; //reduce somulo hp, 7 -> 4
+    rom[0x018A3D] = 0x04; //reduce somulo hp, 7 -> 4
     rom[0x1E2045] = 0xB8; //change trio the pago timer, 40s -> 50s
     rom[0x1E2046] = 0x0B; //^
 
@@ -212,7 +211,7 @@ void AsmAndData() {
 }
 
 
-void PrintLocations(uint64_t seed) {
+void PrintLocations(const uint64_t seed) {
     std::ofstream logFile("log.txt", std::ios::out | std::ios::binary);
 
     logFile << "Seed: " << seed << "\n\n";
@@ -231,13 +230,49 @@ void PrintLocations(uint64_t seed) {
 }
 
 void FixGfx() {
-    uint16_t itemType = uint16_t(locItemPair.at(Location::stage1_Vellum));
-    if(uint8_t(itemType) == 0x48 && (itemType >> 8) >= 0x08) {
-        //tiles to load
-        rom[0x1E9A4D    ] = 0xF4;
-        rom[0x1E9A4D + 1] = 0x00;
+    const std::map<ItemType, ItemGfx> spriteData {
+        {ItemType::fire,          {0x0FC, 0x4F}},
+        {ItemType::crest,         {0x0F4, 0x4D}},
+        {ItemType::vellum,        {0x138, 0x4E}},
+        {ItemType::potion,        {0x0F8, 0x4E}},
+        {ItemType::talismanArmor, {0x100, 0x50}},
+        {ItemType::talismanHand,  {0x148, 0x50}},
+    };
 
-        //update sprite list
-        rom[0x00AF15] = 0x4D;
+    const std::map<Location, GraphicsOffset> graphicsOffset {
+        {Location::stage1_Vellum, {0x1E9A4D, 0xAF15}},
+        {Location::stage1_Potion, {0x1E9A57, 0xAF22}},
+        {Location::arma1,         {0x1E9D92, 0xAF39}},
+    };
+
+    for(const auto [loc, addr] : graphicsOffset) {
+        const ItemType itemType = ItemToItemType(locItemPair.at(loc));
+
+        if(spriteData.contains(itemType)) { //todo: remove .contains eventually
+            const ItemGfx &itemGfx = spriteData.at(itemType);
+            WriteU16(itemGfx.tileSet, addr.tileSet);
+            rom[addr.tileType] = itemGfx.spriteSlot;
+
+            std::cout << itemData.at(locItemPair.at(loc)).name << " fixed at " << locationData.at(loc).name << "\n";
+        }
     }
+}
+
+void WriteU16(const uint16_t value, const uint32_t addr) {
+    rom[addr    ] = value;
+    rom[addr + 1] = value >> 8;
+}
+
+ItemType ItemToItemType(const Item item) {
+    ItemType itemType = ItemType::unknown;
+
+    if(uint8_t(item) == 0x48) {
+        itemType = (uint16_t(item) < 0x0800) ? ItemType::fire : ItemType::crest;
+    } else if(uint16_t(item) == 0x042E) {
+        itemType = ItemType::talismanArmor;
+    } else if(uint16_t(item) == 0x082E) {
+        itemType = ItemType::talismanHand;
+    }
+
+    return itemType;
 }

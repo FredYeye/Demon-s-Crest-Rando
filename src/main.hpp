@@ -5,6 +5,17 @@
 #include "random.hpp"
 
 
+enum class ItemType {
+    unknown, //todo: remove later
+    fire,
+    crest,
+    hp,
+    vellum,
+    potion,
+    talismanArmor,
+    talismanHand,
+};
+
 enum class Item : uint16_t {
     buster     = 0x0048,
     tornado    = 0x0248,
@@ -45,6 +56,7 @@ enum class Item : uint16_t {
     crown = 0x002E,
     skull = 0x022E,
     armor = 0x042E,
+    //fang
     hand  = 0x082E,
 };
 
@@ -95,17 +107,18 @@ enum class Location : uint32_t {
     trioThePago   = 0x1E213E,
 };
 
-enum class Requirement : uint8_t {
-    buster = 0b0000'0001, //buster & legendary
-    ground = 0b0000'0010, //dash into breakable objects
-    flight = 0b0000'0100, //air crest & tornado
-    swim   = 0b0000'1000, //water crest
+enum class Ability : uint8_t {
+    none   = 0b0000,
+    buster = 0b0001, //buster & legendary
+    ground = 0b0010, //dash into breakable objects
+    flight = 0b0100, //air crest & tornado
+    swim   = 0b1000, //water crest
 };
 
 struct ItemData {
     uint8_t completionCheckOffset;
     uint8_t completionCheckBit;
-    uint8_t ability;
+    Ability ability;
     std::string name;
 };
 
@@ -117,63 +130,75 @@ struct LocationData {
     std::string name;
 };
 
+struct GraphicsOffset {
+    uint32_t tileSet;  //offset to which tile set to use for this location
+    uint16_t tileType; //offset to this sprite's gfx slot
+};
+
+struct ItemGfx {
+    uint16_t tileSet;   //tile set for an item
+    uint8_t spriteSlot; //slot used by an item
+};
+
 std::map<Location, Item> locItemPair;
 
 void PlaceItems();
 void StoreNewItemPlacements();
 void AsmAndData();
 void FixGfx();
-void PrintLocations(uint64_t seed);
+void PrintLocations(const uint64_t seed);
+void WriteU16(const uint16_t value, const uint32_t addr);
+ItemType ItemToItemType(const Item item);
 
 Random rng;
 std::vector<uint8_t> rom;
 uint8_t crawlerOffset, crawlerBit;
 
 const std::map<Item, ItemData> itemData {
-    {Item::buster,        {0, 0b0000'0001, 0b0001, "Buster"}},
-    {Item::tornado,       {0, 0b0000'0010, 0b0100, "Tornado"}},
-    {Item::claw,          {0, 0b0000'0100,      0, "Claw"}},
-    {Item::demonFire,     {0, 0b0000'1000,      0, "Demon fire"}},
-    {Item::earthCrest,    {0, 0b0001'0000, 0b0010, "Earth crest"}},
-    {Item::airCrest,      {0, 0b0010'0000, 0b0100, "Air Crest"}},
-    {Item::waterCrest,    {0, 0b0100'0000, 0b1000, "Water Crest"}},
-    {Item::timeCrest,     {0, 0b1000'0000, 0b0001, "Time Crest"}},
+    {Item::buster,        {0, 0b0000'0001, Ability::buster, "Buster"}},
+    {Item::tornado,       {0, 0b0000'0010, Ability::flight, "Tornado"}},
+    {Item::claw,          {0, 0b0000'0100, Ability::none,   "Claw"}},
+    {Item::demonFire,     {0, 0b0000'1000, Ability::none,   "Demon fire"}},
+    {Item::earthCrest,    {0, 0b0001'0000, Ability::ground, "Earth crest"}},
+    {Item::airCrest,      {0, 0b0010'0000, Ability::flight, "Air Crest"}},
+    {Item::waterCrest,    {0, 0b0100'0000, Ability::swim,   "Water Crest"}},
+    {Item::timeCrest,     {0, 0b1000'0000, Ability::buster, "Time Crest"}},
 
     // {Item::ultimate,      {1, 0b0000'0001,       , "Ultimate gargoyle"}},
 
-    {Item::crown,         {2, 0b0000'1000,      0, "Crown"}},
-    {Item::skull,         {2, 0b0001'0000,      0, "Skull"}},
-    {Item::armor,         {2, 0b0010'0000,      0, "Armor"}},
-    {Item::hand,          {2, 0b1000'0000,      0, "Hand"}},
+    {Item::crown,         {2, 0b0000'1000, Ability::none,   "Crown"}},
+    {Item::skull,         {2, 0b0001'0000, Ability::none,   "Skull"}},
+    {Item::armor,         {2, 0b0010'0000, Ability::none,   "Armor"}},
+    {Item::hand,          {2, 0b1000'0000, Ability::none,   "Hand"}},
 
-    {Item::hp1,           {3, 0b0000'0001,      0, "Hp 1"}},
-    {Item::hp2,           {3, 0b0000'0010,      0, "Hp 2"}},
-    {Item::hp3,           {3, 0b0000'0100,      0, "Hp 3"}},
-    {Item::hp4,           {3, 0b0000'1000,      0, "Hp 4"}},
-    {Item::hp5,           {3, 0b0001'0000,      0, "Hp 5"}},
-    {Item::hp6,           {3, 0b0010'0000,      0, "Hp 6"}},
-    {Item::hp7,           {3, 0b0100'0000,      0, "Hp 7"}},
-    {Item::hp8,           {3, 0b1000'0000,      0, "Hp 8"}},
+    {Item::hp1,           {3, 0b0000'0001, Ability::none,   "Hp 1"}},
+    {Item::hp2,           {3, 0b0000'0010, Ability::none,   "Hp 2"}},
+    {Item::hp3,           {3, 0b0000'0100, Ability::none,   "Hp 3"}},
+    {Item::hp4,           {3, 0b0000'1000, Ability::none,   "Hp 4"}},
+    {Item::hp5,           {3, 0b0001'0000, Ability::none,   "Hp 5"}},
+    {Item::hp6,           {3, 0b0010'0000, Ability::none,   "Hp 6"}},
+    {Item::hp7,           {3, 0b0100'0000, Ability::none,   "Hp 7"}},
+    {Item::hp8,           {3, 0b1000'0000, Ability::none,   "Hp 8"}},
 
-    {Item::hp9,           {4, 0b0000'0001,      0, "Hp 9"}},
-    {Item::hp10,          {4, 0b0000'0010,      0, "Hp 10"}},
-    {Item::hp11,          {4, 0b0000'0100,      0, "Hp 11"}},
-    {Item::hp12,          {4, 0b0000'1000,      0, "Hp 12"}},
-    {Item::hp13,          {4, 0b0001'0000,      0, "Hp 13"}},
-    {Item::hp14,          {4, 0b0010'0000,      0, "Hp 14"}},
-    {Item::hp15,          {4, 0b0100'0000,      0, "Hp 15"}},
+    {Item::hp9,           {4, 0b0000'0001, Ability::none,   "Hp 9"}},
+    {Item::hp10,          {4, 0b0000'0010, Ability::none,   "Hp 10"}},
+    {Item::hp11,          {4, 0b0000'0100, Ability::none,   "Hp 11"}},
+    {Item::hp12,          {4, 0b0000'1000, Ability::none,   "Hp 12"}},
+    {Item::hp13,          {4, 0b0001'0000, Ability::none,   "Hp 13"}},
+    {Item::hp14,          {4, 0b0010'0000, Ability::none,   "Hp 14"}},
+    {Item::hp15,          {4, 0b0100'0000, Ability::none,   "Hp 15"}},
 
-    {Item::stage1_Vellum, {5, 0b0000'0001,      0, "Vellum (s1)"}},
-    {Item::stage2_Vellum, {5, 0b0000'0010,      0, "Vellum (s2)"}},
-    {Item::stage3_Vellum, {5, 0b0000'0100,      0, "Vellum (s3)"}},
-    {Item::stage4_Vellum, {5, 0b0000'1000,      0, "Vellum (s4)"}},
-    {Item::stage6_Vellum, {5, 0b0001'0000,      0, "Vellum (s6)"}},
-    {Item::stage1_Potion, {5, 0b0010'0000,      0, "Potion (s1)"}},
-    {Item::stage2_Potion, {5, 0b0100'0000,      0, "Potion (s2)"}},
-    {Item::stage3_Potion, {5, 0b1000'0000,      0, "Potion (s3)"}},
+    {Item::stage1_Vellum, {5, 0b0000'0001, Ability::none,   "Vellum (s1)"}},
+    {Item::stage2_Vellum, {5, 0b0000'0010, Ability::none,   "Vellum (s2)"}},
+    {Item::stage3_Vellum, {5, 0b0000'0100, Ability::none,   "Vellum (s3)"}},
+    {Item::stage4_Vellum, {5, 0b0000'1000, Ability::none,   "Vellum (s4)"}},
+    {Item::stage6_Vellum, {5, 0b0001'0000, Ability::none,   "Vellum (s6)"}},
+    {Item::stage1_Potion, {5, 0b0010'0000, Ability::none,   "Potion (s1)"}},
+    {Item::stage2_Potion, {5, 0b0100'0000, Ability::none,   "Potion (s2)"}},
+    {Item::stage3_Potion, {5, 0b1000'0000, Ability::none,   "Potion (s3)"}},
 
-    {Item::stage4_Potion, {6, 0b0000'0001,      0, "Potion (s4)"}},
-    {Item::stage6_Potion, {6, 0b0000'0010,      0, "Potion (s6)"}},
+    {Item::stage4_Potion, {6, 0b0000'0001, Ability::none,   "Potion (s4)"}},
+    {Item::stage6_Potion, {6, 0b0000'0010, Ability::none,   "Potion (s6)"}},
 };
 
 const std::map<Location, LocationData> locationData {
