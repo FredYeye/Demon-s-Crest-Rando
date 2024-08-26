@@ -1,7 +1,5 @@
 # Demon's Crest Randomizer
 
-Currently in the proof-of-concept stage.
-
 ## How to use
 Simply running DCRando with a rom named "Demon's Crest (USA).sfc" in the same folder will generate a randomized rom. However, you can also run it from a command line prompt and use the following options:
 
@@ -16,8 +14,8 @@ Example:
 ```
 
 ## Issues / todo
-* Replacement items have corrupted graphics.
+* Replacement items have incorrect colors.
+* Some areas will get bugged sprites. This is beca TODO
 * The hp item doesn't have a disable toggle, so you can keep picking up the replacement item. (custom code needed?)
 * Resolve remaining softlocks (stage 6 statues for example).
-* Include the fang talisman in the randomization.
-* Improve item placement algorithm?
+* Include the phalanx stage items (fang talisman & HP) in the randomization.
