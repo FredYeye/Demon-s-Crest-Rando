@@ -22,7 +22,8 @@ fn main() {
         seed.hash(&mut s);
         s.finish()
     } else {
-        0x1337 // todo: generate random seed otherwise
+        // no seed supplied. generate one from the current time
+        std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos() as u64
     };
 
     let mut rando = Rando::new(&args.in_file, seed).expect("msg");
