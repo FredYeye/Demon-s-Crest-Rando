@@ -13,6 +13,10 @@ Example:
   DCRando -s "Give me the hand talisman in stage 1 pls!" -i path/to/rom.sfc
 ```
 
+## How to play
+
+Currently the goal is to find the 5 vellums. This opens up the Phalanx stage, which is the final stage!
+
 ## Issues / todo
 * Replacement items have incorrect colors.
 * Some areas might get bugged sprites. (uses too much vram)
