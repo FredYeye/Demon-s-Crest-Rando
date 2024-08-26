@@ -15,7 +15,7 @@ Example:
 
 ## Issues / todo
 * Replacement items have incorrect colors.
-* Some areas will get bugged sprites. This is beca TODO
+* Some areas might get bugged sprites. (uses too much vram)
 * The hp item doesn't have a disable toggle, so you can keep picking up the replacement item. (custom code needed?)
 * Resolve remaining softlocks (stage 6 statues for example).
 * Include the phalanx stage items (fang talisman & HP) in the randomization.
