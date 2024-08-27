@@ -14,7 +14,6 @@ Example:
 ```
 
 ## How to play
-
 Currently the goal is to find the 5 vellums. This opens up the Phalanx stage, which is the final stage!
 
 ## Issues / todo
