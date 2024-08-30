@@ -53,7 +53,7 @@ impl Rando {
     }
 
     pub fn randomize(&mut self) {
-        let loc_item_pairs: HashMap<Location, Item> = self.assumed_fill();
+        let loc_item_pairs = self.assumed_fill();
         self.write_items_to_rom(&loc_item_pairs);
         self.asm_and_data();
         self.adjust_tile_sets(&loc_item_pairs);

@@ -21,4 +21,3 @@ Currently the goal is to find the 5 vellums. This opens up the Phalanx stage, wh
 * Some areas might get bugged sprites. (uses too much vram)
 * The hp item doesn't have a disable toggle, so you can keep picking up the replacement item. (custom code needed?)
 * Resolve remaining softlocks (stage 6 statues for example).
-* Include the phalanx stage items (fang talisman & HP) in the randomization.
