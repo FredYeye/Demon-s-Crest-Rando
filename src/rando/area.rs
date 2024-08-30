@@ -46,6 +46,11 @@ pub enum Area {
     S6_6b,
     S6HpRoom,
 
+    S7_2,
+    S7_3,
+    S7_4,
+    S7_5,
+
     TrioThePago3,
 }
 
@@ -100,6 +105,11 @@ impl Area {
             S6_5b => 35,
             S6_6b => 36,
             S6HpRoom => 32,
+
+            S7_2 => 38,
+            S7_3 => 39,
+            S7_4 => 40,
+            S7_5 => 41,
 
             TrioThePago3 => 53,
         }

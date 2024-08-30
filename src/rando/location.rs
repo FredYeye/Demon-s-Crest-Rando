@@ -50,6 +50,9 @@ pub enum Location {
     Grewon,
 
     TrioThePago,
+
+    PhalanxHp,
+    PhalanxFang,
 }
 
 impl Location {
@@ -64,6 +67,7 @@ impl Location {
             Stage5Hp1, Stage5Hp2, Stage5Hp3, Crawler, Holothurion,
             Stage6Potion, Stage6Hp, Armor, Stage6Vellum, Arma3, Grewon,
             TrioThePago,
+            PhalanxHp, PhalanxFang,
         ]
     }
 
@@ -112,10 +116,13 @@ impl Location {
             Location::Grewon       => "Grewon",
 
             Location::TrioThePago  => "Trio the Pago",
+
+            Location::PhalanxHp    => "Phalanx (hp)",
+            Location::PhalanxFang  => "Phalanx (fang)",
         }.to_string()
     }
 
-    pub fn log_order() -> [Vec<Self>; 7] {
+    pub fn log_order() -> [Vec<Self>; 8] {
         use Location::*;
 
         [
@@ -126,6 +133,7 @@ impl Location {
             vec![Stage5Hp1, Stage5Hp2, Stage5Hp3, Crawler, Holothurion],
             vec![Stage6Potion, Stage6Hp, Armor, Stage6Vellum, Arma3, Grewon],
             vec![TrioThePago],
+            vec![PhalanxHp, PhalanxFang],
         ]
     }
 
@@ -152,56 +160,61 @@ impl Location {
             Location::Stage6Vellum => vec![(AbilityType::Ground.mask(), 0)],
             Location::Arma3        => vec![(AbilityType::Buster.mask(), 0)],
 
+            Location::PhalanxHp => vec![(AbilityType::CanEnterPhalanx.mask(), 0)], // might need a second req! flight?
+            Location::PhalanxFang => vec![(AbilityType::CanEnterPhalanx.mask(), 0)], // might need a second req! flight?
+
             _ => vec![(0, 0)],
         }
     }
 
-    pub fn rom_offset(&self) -> usize {
-        // todo: convert to snes addresses
+    pub fn rom_offset(&self) -> u32 {
         match self {
-            Location::Stage1Vellum => 0x00B4FD,
-            Location::Stage1Hp     => 0x0251A3,
-            Location::Stage1Potion => 0x02511E,
-            Location::Somulo       => 0x0196D3,
-            Location::Hippogriff1  => 0x011999,
-            Location::Arma1        => 0x00F0A2,
+            Location::Stage1Vellum => 0x81B4FD,
+            Location::Stage1Hp     => 0x84D1A3,
+            Location::Stage1Potion => 0x84D11E,
+            Location::Somulo       => 0x8396D3,
+            Location::Hippogriff1  => 0x829999,
+            Location::Arma1        => 0x81F0A2,
 
-            Location::Stage2Potion => 0x025259,
-            Location::Hand         => 0x0252D1,
-            Location::Stage2Vellum => 0x00D862,
-            Location::Stage2Hp1    => 0x00D864,
-            Location::Stage2Hp2    => 0x00B509,
-            Location::Belth        => 0x01E8D8,
-            Location::Ovnunu       => 0x01C6D4,
+            Location::Stage2Potion => 0x84D259,
+            Location::Hand         => 0x84D2D1,
+            Location::Stage2Vellum => 0x81D862,
+            Location::Stage2Hp1    => 0x81D864,
+            Location::Stage2Hp2    => 0x81B509,
+            Location::Belth        => 0x83E8D8,
+            Location::Ovnunu       => 0x83C6D4,
 
-            Location::Stage3Potion => 0x02558E,
-            Location::Stage3Vellum => 0x00D866,
-            Location::Stage3Hp1    => 0x026163,
-            Location::Stage3Hp2    => 0x00D868,
-            Location::Skull        => 0x0257B1,
-            Location::FlameLord    => 0x014CFD,
-            Location::Scula        => 0x1E8B99, //head
+            Location::Stage3Potion => 0x84D58E,
+            Location::Stage3Vellum => 0x81D866,
+            Location::Stage3Hp1    => 0x84E163,
+            Location::Stage3Hp2    => 0x81D868,
+            Location::Skull        => 0x84D7B1,
+            Location::FlameLord    => 0x82CCFD,
+            Location::Scula        => 0xBD8B99, //head
 
-            Location::Stage4Potion => 0x025813,
-            Location::Stage4Vellum => 0x0259BC,
-            Location::Crown        => 0x00B505,
-            Location::Flier        => 0x02DBA0,
-            Location::Arma2        => 0x00F0A4,
+            Location::Stage4Potion => 0x84D813,
+            Location::Stage4Vellum => 0x84D9BC,
+            Location::Crown        => 0x81B505,
+            Location::Flier        => 0x85DBA0,
+            Location::Arma2        => 0x81F0A4,
 
-            Location::Stage5Hp1    => 0x00B50D,
-            Location::Stage5Hp2    => 0x00B50B,
-            Location::Stage5Hp3    => 0x00D86A,
-            Location::Crawler      => 0x013A12,
-            Location::Holothurion  => 0x01D7B7,
+            Location::Stage5Hp1    => 0x81B50D,
+            Location::Stage5Hp2    => 0x81B50B,
+            Location::Stage5Hp3    => 0x81D86A,
+            Location::Crawler      => 0x82BA12,
+            Location::Holothurion  => 0x83D7B7,
 
-            Location::Stage6Potion => 0x025CBC,
-            Location::Stage6Hp     => 0x00D86C,
-            Location::Armor        => 0x00B511,
-            Location::Stage6Vellum => 0x00B50F,
-            Location::Arma3        => 0x017009,
-            Location::Grewon       => 0x1F1E23,
+            Location::Stage6Potion => 0x84DCBC,
+            Location::Stage6Hp     => 0x81D86C,
+            Location::Armor        => 0x81B511,
+            Location::Stage6Vellum => 0x81B50F,
+            Location::Arma3        => 0x82F009,
+            Location::Grewon       => 0xBE9E25, // original location: BE9E23 (patch changes this location)
 
-            Location::TrioThePago  => 0x1E213E, //0xBCA13E
+            Location::TrioThePago  => 0xBCA13E,
+
+            Location::PhalanxHp    => 0x81D86E,
+            Location::PhalanxFang  => 0x84E06E,
         }
     }
 
@@ -215,13 +228,16 @@ impl Location {
             Stage4Potion | Stage4Vellum |
             Holothurion  |
             Stage6Potion | Arma3 |
-            TrioThePago  => true,
+            TrioThePago |
+            
+            PhalanxFang => true,
 
             _ => false,
         }
     }
 
     pub fn boss_defeat_offset(&self) -> Option<usize> {
+        // convert to snes addresses
         match self {
             Location::Somulo      => Some(0), //could see if somulo does a check just for fun
             Location::Hippogriff1 => Some(0x8123),
@@ -261,7 +277,7 @@ impl Location {
             Location::Stage2Hp1    => (TileList::TileSet,  Item::Hp(1)),
             Location::Stage2Hp2    => (TileList::TileSet,  Item::Hp(1)),
             Location::Belth        => (TileList::MidStage, Item::Hp(1)),
-            Location::Ovnunu       => (TileList::TileSet,  Item::Claw),
+            Location::Ovnunu       => (TileList::TileSet,  Item::Buster),
 
             Location::Stage3Potion => (TileList::TileSet,  Item::Potion(1)),
             Location::Stage3Vellum => (TileList::TileSet,  Item::Vellum(1)),
@@ -291,6 +307,9 @@ impl Location {
             Location::Grewon       => (TileList::TileSet,  Item::DemonFire),
 
             Location::TrioThePago => (TileList::TileSet,  Item::Hp(1)),
+
+            Location::PhalanxHp   => (TileList::TileSet, Item::Hp(1)),
+            Location::PhalanxFang => (TileList::TileSet, Item::Fang),
         }
     }
 
@@ -339,6 +358,9 @@ impl Location {
             Location::Grewon => Area::S6_2a,
 
             Location::TrioThePago => Area::TrioThePago3,
+
+            Location::PhalanxHp => Area::S7_2,
+            Location::PhalanxFang => Area::S7_3,
         }
     }
 

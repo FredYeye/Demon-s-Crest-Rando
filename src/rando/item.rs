@@ -14,7 +14,7 @@ pub enum Item {
     //  1: somulo,          2,              3: belth,           4: scula
     //  5,                  6: holothurion, 7,                  8: s2 pot
     //  9: s2 bone pile,   10,             11: s3 water route, 12: trio the pago
-    // 13: s5 water route, 14,             15: s6              16: phalanx (not included atm)
+    // 13: s5 water route, 14,             15: s6              16: phalanx tower
 
     Vellum(u8), // 1: s1, 2: s2, 3: s3, 4: s4, 5: s6
     Potion(u8), // 1: s1, 2: s2, 3: s3, 4: s4, 5: s6
@@ -22,7 +22,7 @@ pub enum Item {
     Crown,
     Skull,
     Armor,
-    // Fang,
+    Fang,
     Hand,
 }
 
@@ -33,10 +33,10 @@ impl Item {
         vec![
             Buster, Tornado, Claw, DemonFire,
             EarthCrest, AirCrest, WaterCrest, TimeCrest,
-            Hp(1), Hp(2), Hp(3), Hp(4), Hp(5), Hp(6), Hp(7), Hp(8), Hp(9), Hp(10), Hp(11), Hp(12), Hp(13), Hp(14), Hp(15), //Hp(16)?
+            Hp(1), Hp(2), Hp(3), Hp(4), Hp(5), Hp(6), Hp(7), Hp(8), Hp(9), Hp(10), Hp(11), Hp(12), Hp(13), Hp(14), Hp(15), Hp(16),
             Vellum(1), Vellum(2), Vellum(3), Vellum(4), Vellum(5),
             Potion(1), Potion(2), Potion(3), Potion(4), Potion(5),
-            Crown, Skull, Armor, /*Fang,*/ Hand,
+            Crown, Skull, Armor, Fang, Hand,
         ]
     }
 
@@ -56,6 +56,7 @@ impl Item {
             Item::Crown => "Crown",
             Item::Skull => "Skull",
             Item::Armor => "Armor",
+            Item::Fang  => "Fang",
             Item::Hand  => "Hand",
         }.to_string()
     }
@@ -79,6 +80,7 @@ impl Item {
             Item::Crown => 0x002E,
             Item::Skull => 0x022E,
             Item::Armor => 0x042E,
+            Item::Fang  => 0x062E,
             Item::Hand  => 0x082E,
         }
     }
@@ -111,6 +113,7 @@ impl Item {
                     13 => (4, 0b0001_0000),
                     14 => (4, 0b0010_0000),
                     15 => (4, 0b0100_0000),
+                    16 => (4, 0b1000_0000),
                     _ => todo!(),
                 }
             }
@@ -140,11 +143,12 @@ impl Item {
             Item::Crown => (2, 0b0000_1000),
             Item::Skull => (2, 0b0001_0000),
             Item::Armor => (2, 0b0010_0000),
+            Item::Fang  => (2, 0b0100_0000),
             Item::Hand  => (2, 0b1000_0000),
         }
     }
 
-    pub fn tile_sprite_set(&self) -> Option<(u16, u8, u8)> {
+    pub fn tile_sprite_set(&self) -> Option<(u16, [u8; 2])> {
         if let Item::Hp(_) = self {
             return None;
         }
@@ -157,26 +161,24 @@ impl Item {
             Item::Crown => 0x144,
             Item::Skull => 0x140,
             Item::Armor => 0x100,
+            Item::Fang  => 0x13C,
             Item::Hand  => 0x148,
 
             Item::Hp(_) => unreachable!(),
         };
 
         let sprite_set = match self {
-            Item::Buster => (0x4F, 0x08),
-            Item::Tornado => (0x4F, 0x0A),
-            Item::Claw => (0x4F, 0x0A),
-            Item::DemonFire => (0x4F, 0x08),
-            Item::EarthCrest => (0x4D, 0x06),
-            Item::AirCrest => (0x4D, 0x02),
-            Item::WaterCrest => (0x4D, 0x0A),
-            Item::TimeCrest => (0x4D, 0x02),
-            Item::Vellum(_) | Item::Potion(_) => (0x4E, 0x02),
-            Item::Crown | Item::Skull | Item::Armor | Item::Hand => (0x50, 0x02),
+            Item::Buster | Item::DemonFire => [0x4F, 0x08],
+            Item::Tornado | Item::Claw    => [0x4F, 0x0A],
+            Item::EarthCrest => [0x4D, 0x06],
+            Item::AirCrest | Item::TimeCrest   => [0x4D, 0x02],
+            Item::WaterCrest => [0x4D, 0x0A],
+            Item::Vellum(_) | Item::Potion(_) => [0x4E, 0x02],
+            Item::Crown | Item::Skull | Item::Armor | Item::Fang | Item::Hand => [0x50, 0x02],
 
             Item::Hp(_) => unreachable!(),
         };
 
-        Some((tile_set, sprite_set.0, sprite_set.1))
+        Some((tile_set, sprite_set))
     }
 }

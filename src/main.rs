@@ -23,6 +23,7 @@ fn main() {
         s.finish()
     } else {
         // no seed supplied. generate one from the current time
+        // todo: turn into string and run through hasher
         std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos() as u64
     };
 

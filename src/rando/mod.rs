@@ -112,11 +112,11 @@ impl Rando {
 
     fn write_items_to_rom(&mut self, loc_item_pairs: &HashMap<Location, Item>) {
         for (loc, item) in loc_item_pairs {
-            let offset = loc.rom_offset();
+            let offset = Self::snes_to_effective(loc.rom_offset());
             let item_id = item.id();
 
             match loc {
-                Location::Crawler | Location::Grewon => {
+                Location::Crawler => {
                     self.rom[offset    ] = item_id.to_le_bytes()[1];
                     self.rom[offset + 3] = item_id.to_le_bytes()[0];
                 }
@@ -181,23 +181,25 @@ impl Rando {
         // set exit status for items?
 
         for loc in Location::get_all() {
+            let base = Self::snes_to_effective(loc.rom_offset());
+
             if loc.boss_defeat_offset().is_some() {
                 let offset = match loc {
-                    Location::Grewon | Location::Crawler => (3, 0),
+                    Location::Crawler => (3, 0),
                     _ => (0, 1),
                 };
 
-                let temp = (self.rom[loc.rom_offset() + offset.1] & !0x40) as usize;
+                let temp = (self.rom[base + offset.1] & !0x40) as usize;
 
-                match self.rom[loc.rom_offset() + offset.0] {
+                match self.rom[base + offset.0] {
                     0x2D => self.rom[ 0x1FD547      + (temp >> 1)] = 1,
                     0x2E => self.rom[ 0x1FD5D5      + (temp >> 1)] = 1,
                     0x48 => self.rom[ 0x1FD597      + (temp >> 1)] = 2,
                     0x49 => self.rom[(0x1FD500 - 1) +  temp      ] = 1,
                     _ => todo!(),
                 }
-            } else if self.rom[loc.rom_offset()] == 0x48 { // set powerups to not exit
-                let temp = (self.rom[loc.rom_offset() + 1] & !0x40) >> 1;
+            } else if self.rom[base] == 0x48 { // set powerups to not exit
+                let temp = (self.rom[base + 1] & !0x40) >> 1;
                 self.rom[0x1FD597 + temp as usize] = 6;
             }
         }
@@ -226,7 +228,7 @@ impl Rando {
 
         for (loc, item) in loc_item_pairs {
             // if new item needs to add a tile set
-            if let Some((tile_set, sprite_set1, sprite_set2)) = item.tile_sprite_set() {
+            if let Some((tile_set, sprite_set)) = item.tile_sprite_set() {
 
                 let (tile_list, original_item) = loc.location_gfx();
                 let area_id = loc.area().offset() as usize;
@@ -241,9 +243,7 @@ impl Rando {
                             TileList::TileSet => {
                                 let tile_set_idx = gfx.tile_set_index[area_id] as usize;
                                 gfx.tile_set[tile_set_idx].insert(0, tile_set);
-
-                                gfx.sprite_set[sprite_set_idx].insert(0, sprite_set1);
-                                gfx.sprite_set[sprite_set_idx].insert(1, sprite_set2);
+                                gfx.sprite_set[sprite_set_idx].insert(0, sprite_set);
                             }
 
                             TileList::MidStage => {
@@ -258,9 +258,7 @@ impl Rando {
                                     todo!()
                                 }
 
-                                // remove ending 0 and add back. should maybe be removed from vec in the first place
-                                gfx.sprite_set[sprite_set_idx].pop();
-                                gfx.sprite_set[sprite_set_idx].extend_from_slice(&[sprite_set1, sprite_set2, 0]);
+                                gfx.sprite_set[sprite_set_idx].push(sprite_set);
                             }
                         }
                     }
@@ -268,10 +266,12 @@ impl Rando {
                     _ => {
                         // replace old item's tile / sprite set slot
                         let original_data = original_item.tile_sprite_set().unwrap();
+
                         match tile_list {
                             TileList::TileSet => {
                                 let tile_set_idx = gfx.tile_set_index[area_id] as usize;
 
+                                // this might cause problems? it's replacing all sets that are identical
                                 for x in &mut gfx.tile_set[tile_set_idx] {
                                     if *x == original_data.0 {
                                         *x = tile_set;
@@ -294,16 +294,10 @@ impl Rando {
                             }
                         }
 
-                        let mut x = 0;
-
-                        while x < gfx.sprite_set[sprite_set_idx].len() {
-                            // todo: make this look better
-                            if gfx.sprite_set[sprite_set_idx][x] == original_data.1 && gfx.sprite_set[sprite_set_idx][x + 1] == original_data.2 {
-                                gfx.sprite_set[sprite_set_idx][x    ] = sprite_set1;
-                                gfx.sprite_set[sprite_set_idx][x + 1] = sprite_set2;
+                        for set in &mut gfx.sprite_set[sprite_set_idx] {
+                            if *set == original_data.1 {
+                                *set = sprite_set;
                             }
-
-                            x += 2;
                         }
                     }
                 }

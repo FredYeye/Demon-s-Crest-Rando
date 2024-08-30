@@ -69,7 +69,7 @@ org $BFD580 : power_exit_check:
 .store:
     sta $05
     rtl
-    
+
 .power_exit_list: ;DCRando will fill in these
 }
 
@@ -126,6 +126,19 @@ org $85A1F6
 .ret:
     sep #$20
     rtl
+}
+
+{ ;fix terrible grewon / grewon 2 code (separates demon fire & full health drop id loads)
+org $BE9E22
+    rep #$20
+    lda #$0648 ;demon fire drop. gets replaced in rando
+    ldx $03
+    beq grewon2
+
+    lda #$8000 : sta $09ED
+    lda #$0623 ;full health drop
+    nop
+grewon2:
 }
 
 ;----------- gfx related changes, mostly moving code and adjusting call sites
