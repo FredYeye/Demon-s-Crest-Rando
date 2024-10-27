@@ -140,28 +140,33 @@ impl Location {
     pub fn requirement(&self) -> Vec<(u8, u8)> {
         match self {
             Location::Stage1Hp     => vec![(AbilityType::Buster.mask(), 0)],
+
             Location::Hand         => vec![(AbilityType::Swim.mask(), 0), (0, 8)],
             Location::Stage2Vellum => vec![(AbilityType::Buster.mask() | AbilityType::Ground.mask(), 0)],
             Location::Stage2Hp1    => vec![(AbilityType::Ground.mask(), 0)],
             Location::Stage2Hp2    => vec![(AbilityType::Buster.mask() | AbilityType::Ground.mask(), 0)],
             Location::Ovnunu       => vec![(AbilityType::Ground.mask(), 0)],
+
             Location::Stage3Vellum => vec![(AbilityType::Buster.mask(), 0)],
             Location::Stage3Hp2    => vec![(AbilityType::Swim.mask(), 0), (AbilityType::Buster.mask(), 7)],
             Location::Skull        => vec![(AbilityType::Buster.mask(), 0)],
+
             Location::Stage4Potion => vec![(AbilityType::Buster.mask(), 0)],
+
             Location::Stage5Hp1    => vec![(AbilityType::Ground.mask(), 0)],
             Location::Stage5Hp2    => vec![(AbilityType::Ground.mask(), 0)],
             Location::Stage5Hp3    => vec![(AbilityType::Swim.mask(), 0)],
             Location::Crawler      => vec![(AbilityType::Ground.mask(), 0)],
             Location::Holothurion  => vec![(AbilityType::Swim.mask(), 0)],
+
             Location::Stage6Potion => vec![(AbilityType::Flight.mask(), 0)],
             Location::Stage6Hp     => vec![(AbilityType::Flight.mask(), 0)],
             Location::Armor        => vec![(AbilityType::Ground.mask() | AbilityType::Flight.mask(), 0)],
             Location::Stage6Vellum => vec![(AbilityType::Ground.mask(), 0)],
-            Location::Arma3        => vec![(AbilityType::Buster.mask(), 0)],
+            Location::Arma3        => vec![(AbilityType::Buster.mask() | AbilityType::Flight.mask(), 0)],
 
-            Location::PhalanxHp => vec![(AbilityType::CanEnterPhalanx.mask(), 0)], // might need a second req! flight?
-            Location::PhalanxFang => vec![(AbilityType::CanEnterPhalanx.mask(), 0)], // might need a second req! flight?
+            Location::PhalanxHp => vec![(AbilityType::CanEnterPhalanx.mask() | AbilityType::Flight.mask(), 0)],
+            Location::PhalanxFang => vec![(AbilityType::CanEnterPhalanx.mask() | AbilityType::Flight.mask(), 0)],
 
             _ => vec![(0, 0)],
         }

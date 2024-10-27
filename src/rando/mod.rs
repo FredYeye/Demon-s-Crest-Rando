@@ -53,7 +53,21 @@ impl Rando {
     }
 
     pub fn randomize(&mut self) {
-        let loc_item_pairs = self.assumed_fill();
+        let item_count = Item::get_all().len();
+
+        let mut loc_item_pairs;
+
+        // assumed fill can in rare cases fail to fill all locations.
+        // not sure if the problem is with my implementation or with assumed fill in general.
+        // in any case: if it fails, retry until it succeeds
+        loop {
+            loc_item_pairs = self.assumed_fill();
+            if loc_item_pairs.len() == item_count {
+                break;
+            }
+        }
+
+        // let loc_item_pairs = self.assumed_fill();
         self.write_items_to_rom(&loc_item_pairs);
         self.asm_and_data();
         self.adjust_tile_sets(&loc_item_pairs);

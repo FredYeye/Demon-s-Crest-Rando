@@ -62,24 +62,6 @@ impl Rand {
         }
     }
 
-    pub fn weighted_rand_idx(&mut self, weights: &[u16]) -> usize {
-        let weight_sum: u16 = weights.iter().sum();
-        let mut rng = self.bounded_rand(weight_sum as u64) as u16;
-
-        let mut ret_idx = 0;
-
-        for (idx, &weight) in weights.iter().enumerate() {
-            if rng < weight {
-                ret_idx = idx;
-                break;
-            }
-
-            rng -= weight
-        }
-
-        ret_idx
-    }
-
     pub fn shuffle<T> (&mut self, seq: &mut [T]) {
         for idx in (1 .. seq.len()).rev() {
             let rng = self.bounded_rand(idx as u64 + 1) as usize;
