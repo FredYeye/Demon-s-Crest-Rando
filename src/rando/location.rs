@@ -147,7 +147,7 @@ impl Location {
             Location::Stage2Hp2    => vec![(AbilityType::Buster.mask() | AbilityType::Ground.mask(), 0)],
             Location::Ovnunu       => vec![(AbilityType::Ground.mask(), 0)],
 
-            Location::Stage3Vellum => vec![(AbilityType::Buster.mask(), 0)],
+            Location::Stage3Vellum => vec![(AbilityType::Buster.mask(), 0), (AbilityType::Swim.mask(), 0)],
             Location::Stage3Hp2    => vec![(AbilityType::Swim.mask(), 0), (AbilityType::Buster.mask(), 7)],
             Location::Skull        => vec![(AbilityType::Buster.mask(), 0)],
 
@@ -160,7 +160,7 @@ impl Location {
             Location::Holothurion  => vec![(AbilityType::Swim.mask(), 0)],
 
             Location::Stage6Potion => vec![(AbilityType::Flight.mask(), 0)],
-            Location::Stage6Hp     => vec![(AbilityType::Flight.mask(), 0)],
+            Location::Stage6Hp     => vec![(AbilityType::Flight.mask(), 0)], // needs ability that can hit low
             Location::Armor        => vec![(AbilityType::Ground.mask() | AbilityType::Flight.mask(), 0)],
             Location::Stage6Vellum => vec![(AbilityType::Ground.mask(), 0)],
             Location::Arma3        => vec![(AbilityType::Ground.mask() | AbilityType::Flight.mask(), 0)],
@@ -234,7 +234,6 @@ impl Location {
             Holothurion  |
             Stage6Potion | Arma3 |
             TrioThePago |
-            
             PhalanxFang => true,
 
             _ => false,
