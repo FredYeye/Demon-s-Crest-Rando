@@ -163,7 +163,7 @@ impl Location {
             Location::Stage6Hp     => vec![(AbilityType::Flight.mask(), 0)],
             Location::Armor        => vec![(AbilityType::Ground.mask() | AbilityType::Flight.mask(), 0)],
             Location::Stage6Vellum => vec![(AbilityType::Ground.mask(), 0)],
-            Location::Arma3        => vec![(AbilityType::Buster.mask() | AbilityType::Flight.mask(), 0)],
+            Location::Arma3        => vec![(AbilityType::Ground.mask() | AbilityType::Flight.mask(), 0)],
 
             Location::PhalanxHp => vec![(AbilityType::CanEnterPhalanx.mask() | AbilityType::Flight.mask(), 0)],
             Location::PhalanxFang => vec![(AbilityType::CanEnterPhalanx.mask() | AbilityType::Flight.mask(), 0)],
